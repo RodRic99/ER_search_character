@@ -1,59 +1,102 @@
 import requests
-import fastapi
 import sqlite3
 import json
 import pandas as pd
-import numpy as np
 from collections import defaultdict
-class send_erdata():
 
-    def __init__(self):
-        self.test_id="43543072"
-        self.file_path=r"C:\Users\RodRic\Documents\GitHub\ER_search_character\eternareturn_DB\api_key\api_key.txt"
-        self.api_link=r"https://open-api.bser.io/v1/games/"
-        self.teams=None
-        self.rawdata=None
-        print(self.api_link)
+class SendERData:
 
+    def __init__(self, user_id: str, api_key_path: str, db_path: str):
+        self.user_id      = user_id
+        self.api_key_path = api_key_path
+        self.api_url      = f"https://open-api.bser.io/v1/games/{user_id}"
+        self.db_path      = db_path
+        self.teams        = []      # list[dict]
+        self.summary_df   = None    # pandas.DataFrame
 
-    def read_api_key(self):
+    def _load_api_key(self) -> str:
         try:
-            with open(self.file_path, 'r', encoding='utf-8') as file:
-                key = file.read()
-                print(key)
-        except FileNotFoundError:
-            return print(f"파일을 찾을 수 없습니다: {self.file_path}")
+            with open(self.api_key_path, 'r', encoding='utf-8') as f:
+                return f.read().strip()
         except Exception as e:
-             return print(f"파일 읽기 중 오류 발생: {e}")
-        headers = {
-            "x-api-key": key
-        }
-        try:
-            response=requests.get(self.api_link,headers=headers)
-            response.raise_for_status()  # HTTP 오류 발생 시 예외 처리
-            self.rawdata = response.json()
-            print(self.rawdata)
-        except requests.RequestException as e:
-            print("요청 중 오류 발생:", e)
-        self.teams  = defaultdict(list)
-        for game in self.rawdata.get("userGames", []):
-            team = game.get("gameRank")
-            self.teams[team].append({
-                "gameId":       game.get("gameId"),
-                "nickname":     game.get("nickname", None),
-                "rankTier":     game.get("mmrBefore", None),
-                "getRP":        game.get("mmrGain", None),
-                "characterNum": game.get("characterNum", None),
+            raise RuntimeError(f"API 키 로드 실패: {e}")
+
+    def fetch_and_build(self):
+        # 1) API 호출
+        key = self._load_api_key()
+        headers = {"x-api-key": key}
+        resp = requests.get(self.api_url, headers=headers)
+        resp.raise_for_status()
+        data = resp.json()
+
+        # 2) rawdata → list of dict
+        for game in data.get("userGames", []):
+            self.teams.append({
+                "gamerank":     game.get("gameRank"),
+                "gameid":       game.get("gameId"),
+                "nickname":     game.get("nickname"),
+                "ranktier":     game.get("mmrBefore"),
+                "getrp":        game.get("mmrGain"),
+                "playerkill":        game.get("playerKill"),
+                "demage":       game.get("damageToPlayer"),
+                "characterNum": game.get("characterNum"),
+                "bestWeapon": game.get("bestWeapon"),
+                "rankpoint":    game.get("rankPoint"),
             })
-        # 각 팀별로 개별 플레이어 통계 출력
-        for team_rank, players in self.teams.items():
-            print(f"팀 (게임 랭크 = {team_rank}):")
-            for player in enumerate(players):
-                print(f"    캐릭터: {player['characterNum']}")
-                print(f"    획득RP: {player['getRP']}")
-            print()
+       
+        # 3) DataFrame 생성
+        df = pd.DataFrame(self.teams)
+        
+        # 4) 그룹 요약: ranktier/getrp는 평균, 나머지는 리스트
+        self.summary_df = (
+            df
+            .groupby('gamerank', as_index=False)
+            .agg({
+                'gameid':       'first',
+                'nickname':     str,
+                'demage':       list,
+                'characterNum': list,
+                'rankpoint':    list,
+                'ranktier':     'mean',
+                'getrp':        'mean',
+            })
+            .rename(columns={
+                'ranktier': 'avg_ranktier',
+                'getrp':    'avg_getrp'
+            })
+        )
+        print(self.summary_df)
+
+
 
     def send_db(self):
-        path="./db/db.db"
-        with sqlite3.connect(path) as condb:
-            conn=sqlite3.connect(path)
+        if self.summary_df is None:
+            raise RuntimeError("데이터를 먼저 fetch_and_build()로 준비해주세요.")
+
+        # 디렉터리 체크(없으면 생성)
+        import os
+        db_dir = os.path.dirname(self.db_path)
+        if db_dir and not os.path.isdir(db_dir):
+            os.makedirs(db_dir, exist_ok=True)
+
+        # 5) DB에 한 번만 연결해서 to_sql
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                self.summary_df.to_sql(
+                    'userdb',
+                    conn,
+                    if_exists='append',
+                    index=False
+                )
+                print("✅ 데이터베이스에 성공적으로 저장했습니다.")
+        except Exception as e:
+            print(f"❌ DB 저장 중 오류 발생: {e}")
+
+if __name__ == "__main__":
+    sender = SendERData(
+        user_id="47832485",
+        api_key_path=r".\api_key\api_key.txt",
+        db_path="./db/db.db"
+    )
+    sender.fetch_and_build()
+    sender.send_db()
