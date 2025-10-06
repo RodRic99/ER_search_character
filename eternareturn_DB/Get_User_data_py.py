@@ -30,47 +30,87 @@ class SendERData:
         data = resp.json()
 
         # 2) rawdata → list of dict
+        self.teams = []  # 잔여분 방지
         for game in data.get("userGames", []):
             self.teams.append({
-                "gamerank":     game.get("gameRank"),
-                "gameid":       game.get("gameId"),
-                "nickname":     game.get("nickname"),
-                "ranktier":     game.get("mmrBefore"),
-                "getrp":        game.get("mmrGain"),
-                "playerkill":        game.get("playerKill"),
-                "demage":       game.get("damageToPlayer"),
-                "characterNum": game.get("characterNum"),
-                "bestWeapon": game.get("bestWeapon"),
-                "rankpoint":    game.get("rankPoint"),
+                "matchingmode":  game.get("matchingMode"),
+                "gamerank":      game.get("gameRank"),
+                "gameid":        game.get("gameId"),
+                "nickname":      game.get("nickname"),
+                "ranktier":      game.get("mmrBefore"),
+                "getmmr":        game.get("mmrGain"),         # ← 이름 일관
+                "playerkill":    game.get("playerKill"),
+                "damage":        game.get("damageToPlayer"),  # ← 철자 통일(선택)
+                "characterNum":  game.get("characterNum"),
+                "bestWeapon":    game.get("bestWeapon"),
+                "rankpoint":     game.get("rankPoint"),       # ← rankPoint 사용
             })
-       
+        
+
         # 3) DataFrame 생성
         df = pd.DataFrame(self.teams)
-        
-        # 4) 그룹 요약: ranktier/getrp는 평균, 나머지는 리스트
-        self.summary_df = (
-            df
-            .groupby('gamerank', as_index=False)
+        # 숫자 보장
+        num_cols = ["ranktier", "getmmr", "rankpoint", "playerkill", "damage", "characterNum"]
+        for c in num_cols:
+            if c in df.columns:
+                df[c] = pd.to_numeric(df[c], errors="coerce")
+
+        print("=== raw df ===")
+        print(df.head())
+
+        # 4) 게임ID+팀별 요약: 평균/리스트/최빈값
+        def mode_or_first(s: pd.Series):
+            m = s.mode()
+            return m.iat[0] if len(m) else (s.iloc[0] if len(s) else None)
+
+        grouped = (
+            df.groupby(['gameid','gamerank'], as_index=False)
             .agg({
-                'gameid':       'first',
-                'nickname':     str,
-                'demage':       list,
-                'characterNum': list,
-                'rankpoint':    list,
-                'ranktier':     'mean',
-                'getrp':        'mean',
+                'matchingmode':  mode_or_first,  # 팀 내 동일하면 최빈값
+                'nickname':      list,           # 개별값은 리스트로 보존
+                'characterNum':  list,
+                'damage':        list,
+                'playerkill':    list,
+                'bestWeapon':    list,
+                'ranktier':      'mean',         # 대표 평균
+                'getmmr':        'mean',
+                'rankpoint':     'mean',
             })
             .rename(columns={
-                'ranktier': 'avg_ranktier',
-                'getrp':    'avg_getrp'
+                'ranktier':  'avg_ranktier',
+                'getmmr':    'avg_getmmr',
+                'rankpoint': 'avg_rankpoint'
             })
         )
-        print(self.summary_df)
+        self.summary_df = grouped
+        print("=== summary_df (per gameid,gamerank) ===")
+        print(self.summary_df.head())
 
+        # 5) 리스트 컬럼을 멤버별 열로 분리 (폭 형태) — 안정적: explode → pivot
+        #   닉네임/캐릭/피해/킬/무기까지 멤버별 열 생성
+        list_cols = ['nickname','characterNum','damage','playerkill','bestWeapon']
+        long = grouped.explode(list_cols, ignore_index=True)
+        long['member_idx'] = long.groupby(['gameid','gamerank']).cumcount() + 1
+
+        wide = long.pivot(index=['gameid','gamerank'],
+                        columns='member_idx',
+                        values=list_cols).sort_index(axis=1, level=0)
+
+        # 멀티인덱스 → 단일 컬럼명 예: nickname_1, characterNum_1 ...
+        wide.columns = [f'{col}_{idx}' for col, idx in wide.columns]
+        wide = wide.reset_index()
+
+        # 요약(평균들/모드)과 병합해 한 테이블로도 활용 가능
+        meta_cols = ['gameid','gamerank','matchingmode','avg_ranktier','avg_getmmr','avg_rankpoint']
+        final = wide.merge(grouped[meta_cols], on=['gameid','gamerank'], how='left')
+
+        self.wide_df = final
+        print("=== wide_df (members split + meta) ===")
+        print(self.wide_df.head())
 
 
     def send_db(self):
-        if self.summary_df is None:
+        if self.wide_df is None:
             raise RuntimeError("데이터를 먼저 fetch_and_build()로 준비해주세요.")
 
         # 디렉터리 체크(없으면 생성)
@@ -82,7 +122,7 @@ class SendERData:
         # 5) DB에 한 번만 연결해서 to_sql
         try:
             with sqlite3.connect(self.db_path) as conn:
-                self.summary_df.to_sql(
+                self.wide_df.to_sql(
                     'userdb',
                     conn,
                     if_exists='append',
@@ -94,7 +134,7 @@ class SendERData:
 
 if __name__ == "__main__":
     sender = SendERData(
-        user_id="47832485",
+        user_id="50240000",
         api_key_path=r".\api_key\api_key.txt",
         db_path="./db/db.db"
     )
