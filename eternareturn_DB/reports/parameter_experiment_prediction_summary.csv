@@ -1,0 +1,6 @@
+﻿experiment_id,label,prediction_csv,top_input_combo,top_character_combo_names,top_weapon_combo_names,top_predicted_avg_getmmr
+exp_01,baseline_light,C:\Users\wnsgu\OneDrive\바탕 화면\CapStone\ER_search_character\eternareturn_DB\predictions\all_character_combinations_avg_getmmr_exp_01.csv,42_73_80,비앙카_살럿_이슈트반,아르카나_아르카나_창,61.52091598510742
+exp_02,shallower_regularized,C:\Users\wnsgu\OneDrive\바탕 화면\CapStone\ER_search_character\eternareturn_DB\predictions\all_character_combinations_avg_getmmr_exp_02.csv,42_73_80,비앙카_살럿_이슈트반,아르카나_아르카나_창,57.285831451416016
+exp_03,deeper_conservative,C:\Users\wnsgu\OneDrive\바탕 화면\CapStone\ER_search_character\eternareturn_DB\predictions\all_character_combinations_avg_getmmr_exp_03.csv,42_73_80,비앙카_살럿_이슈트반,아르카나_아르카나_창,67.53717041015625
+exp_04,more_row_sampling,C:\Users\wnsgu\OneDrive\바탕 화면\CapStone\ER_search_character\eternareturn_DB\predictions\all_character_combinations_avg_getmmr_exp_04.csv,42_73_80,비앙카_살럿_이슈트반,아르카나_아르카나_창,60.710391998291016
+exp_05,strong_l2,C:\Users\wnsgu\OneDrive\바탕 화면\CapStone\ER_search_character\eternareturn_DB\predictions\all_character_combinations_avg_getmmr_exp_05.csv,40_63_64,클로에_이안_바냐,암기_단검_아르카나,56.739532470703125

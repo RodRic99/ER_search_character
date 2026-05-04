@@ -1,0 +1,2 @@
+﻿rows,below_6000_rows,recent_rows,medium_rows,old_rows,train_rows,valid_rows,test_rows,time_decay,cutoff_datetime,recent_days,medium_days,recent_weight,medium_weight,old_weight,rankpoint_threshold,train_weight_mean,train_weight_min,mae,rmse,r2,experiment_id,label
+3036868,2555146,156450,164698,160574,1705579,421806,909483,True,,7,14,1.0,0.5,0.2,6100,0.9307023597265209,0.2,46.080666842050114,58.5498695119355,0.004587384880471834,exp_02_rp_6100,shallower_regularized_rankpoint_6100

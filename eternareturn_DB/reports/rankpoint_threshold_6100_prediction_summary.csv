@@ -1,0 +1,2 @@
+﻿experiment_id,label,prediction_csv,top_input_combo,top_character_combo_names,top_weapon_combo_names,top_predicted_avg_getmmr
+exp_02_rp_6100,shallower_regularized_rankpoint_6100,C:\Users\wnsgu\OneDrive\바탕 화면\CapStone\ER_search_character\eternareturn_DB\predictions\all_character_combinations_avg_getmmr_exp_02_rp_6100.csv,38_40_70,제니_클로에_츠바메,권총_암기_암기,66.5943603515625

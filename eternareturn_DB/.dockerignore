@@ -1,0 +1,9 @@
+.env
+.idea
+__pycache__
+*.pyc
+*.log
+*.err.log
+reports
+predictions
+train_data.csv

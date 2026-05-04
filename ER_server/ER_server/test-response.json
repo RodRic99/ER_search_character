@@ -1,0 +1,52 @@
+﻿{
+    "players":  [
+                    {
+                        "most3Characters":  [
+                                                "í¤ì´ì¦",
+                                                "ìë¹ê²ì¼",
+                                                "ë°ë¹ë§ë¥¼ë "
+                                            ],
+                        "playerName":  "Roadric",
+                        "prediction":  {
+                                           "predicted_avg_getmmr":  18.33540916442871,
+                                           "input_combo":  "58_65_67|10_14_16",
+                                           "character_combo_names":  "í¤ì´ì¦_ë°ë¹ë§ë¥¼ë _ìë¹ê²ì¼",
+                                           "weapon_combo_names":  "ëê²© ìì´_ëë¼_ììê²",
+                                           "combo_names":  "í¤ì´ì¦_ë°ë¹ë§ë¥¼ë _ìë¹ê²ì¼|ëê²© ìì´_ëë¼_ììê²"
+                                       },
+                        "userId":  "C0lnYKk3i0u-I8pypa2mW8UxVDGgkSAwKkpmgShTv_RztVKbFP7qM3Fs"
+                    },
+                    {
+                        "most3Characters":  [
+                                                "ìë¦¬ì",
+                                                "ë¤ë¥´ì½",
+                                                "ë²ëì¤"
+                                            ],
+                        "playerName":  "ì¼êµ¬ê³µëì¡ìì²­ë\u0085",
+                        "prediction":  {
+                                           "predicted_avg_getmmr":  21.619657516479492,
+                                           "input_combo":  "25_32_74|3_5_11",
+                                           "character_combo_names":  "ë²ëì¤_ìë¦¬ì_ë¤ë¥´ì½",
+                                           "weapon_combo_names":  "ë°©ë§ì´_í¬ì²_ì ê²©ì´",
+                                           "combo_names":  "ë²ëì¤_ìë¦¬ì_ë¤ë¥´ì½|ë°©ë§ì´_í¬ì²_ì ê²©ì´"
+                                       },
+                        "userId":  "Ic6bc2dMwLQXYeEO4okGX8sedRbQWLuZGGk2ID6i34Trjks91YGOyA0zvyf6llz13s2hA9uYLRV4aw"
+                    },
+                    {
+                        "most3Characters":  [
+                                                "ì",
+                                                "ë§ì»¤ì¤",
+                                                "ì¹´ë°ë¡"
+                                            ],
+                        "playerName":  "ë¤ì´ìê´ë¬¼ì¢\u0085ì",
+                        "prediction":  {
+                                           "predicted_avg_getmmr":  19.008838653564453,
+                                           "input_combo":  "35_39_53|2_13_21",
+                                           "character_combo_names":  "ì_ì¹´ë°ë¡_ë§ì»¤ì¤",
+                                           "weapon_combo_names":  "í¤í_ë§ì¹_ë ì´í¼ì´",
+                                           "combo_names":  "ì_ì¹´ë°ë¡_ë§ì»¤ì¤|í¤í_ë§ì¹_ë ì´í¼ì´"
+                                       },
+                        "userId":  "MdNsA_trTLk2OPJlSGum0BtVCQKpg1pKzj_CPKuvB-3jOU7kcnkf952hvSuWIkJxW9cKivbiJUU"
+                    }
+                ]
+}
