@@ -404,6 +404,21 @@ class SendERData:
             return False
         return game_time <= datetime.now() - timedelta(hours=hours)
 
+    def is_before_datetime(self, value, cutoff_datetime):
+        converted = self.convert_startdtm(value)
+        if converted is None:
+            return False
+        try:
+            game_time = datetime.strptime(converted, "%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            return False
+
+        if isinstance(cutoff_datetime, str):
+            cutoff_dt = datetime.strptime(cutoff_datetime[:19].replace("T", " "), "%Y-%m-%d %H:%M:%S")
+        else:
+            cutoff_dt = cutoff_datetime
+        return game_time < cutoff_dt
+
     def fetch_and_build(self):
         print("API 호출 중...")
         self.clear_temp_data()
@@ -537,7 +552,7 @@ class SendERData:
 if __name__ == "__main__":
     sender = SendERData(game_id="58444343")
     settingmmode = 1
-    loop_mode = 1 b
+    loop_mode = 1
     loop_count = 10000000
 
     sender.first_db_check()

@@ -13,13 +13,23 @@ public class RecommendedCombinationDto {
     private final List<String> characterNames;
     private final List<String> weaponNames;
     private final double predictedAvgGetmmr;
+    private Double overallScore;
+    private Double predictedAvgGetmmrScore;
     private final String inputCombo;
     private final Double characterSynergy1;
     private final Double characterSynergy2;
     private final Double characterSynergy3;
+    private Double characterSynergy1Score;
+    private Double characterSynergy2Score;
+    private Double characterSynergy3Score;
     private Double samePositionAverageGetmmr;
+    private Double samePositionAverageGetmmrScore;
     private Integer samePositionSampleCount;
     private String positionSummary;
+    private String positionMainCombo;
+    private String positionSubCombo;
+    private Double samePositionAverageDamage;
+    private Double samePositionAverageHealAmount;
     private List<String> pairPositionLabels;
 
     public RecommendedCombinationDto(
@@ -48,12 +58,56 @@ public class RecommendedCombinationDto {
         this.samePositionAverageGetmmr = samePositionAverageGetmmr;
     }
 
+    public void setPredictedAvgGetmmrScore(Double predictedAvgGetmmrScore) {
+        this.predictedAvgGetmmrScore = predictedAvgGetmmrScore;
+    }
+
+    public void setCharacterSynergy1Score(Double characterSynergy1Score) {
+        this.characterSynergy1Score = characterSynergy1Score;
+    }
+
+    public void setCharacterSynergy2Score(Double characterSynergy2Score) {
+        this.characterSynergy2Score = characterSynergy2Score;
+    }
+
+    public void setCharacterSynergy3Score(Double characterSynergy3Score) {
+        this.characterSynergy3Score = characterSynergy3Score;
+    }
+
+    public void setSamePositionAverageGetmmrScore(Double samePositionAverageGetmmrScore) {
+        this.samePositionAverageGetmmrScore = samePositionAverageGetmmrScore;
+    }
+
+    public void setOverallScore(Double overallScore) {
+        this.overallScore = overallScore;
+    }
+
+    public Double getOverallScore() {
+        return overallScore;
+    }
+
     public void setSamePositionSampleCount(Integer samePositionSampleCount) {
         this.samePositionSampleCount = samePositionSampleCount;
     }
 
     public void setPositionSummary(String positionSummary) {
         this.positionSummary = positionSummary;
+    }
+
+    public void setPositionMainCombo(String positionMainCombo) {
+        this.positionMainCombo = positionMainCombo;
+    }
+
+    public void setPositionSubCombo(String positionSubCombo) {
+        this.positionSubCombo = positionSubCombo;
+    }
+
+    public void setSamePositionAverageDamage(Double samePositionAverageDamage) {
+        this.samePositionAverageDamage = samePositionAverageDamage;
+    }
+
+    public void setSamePositionAverageHealAmount(Double samePositionAverageHealAmount) {
+        this.samePositionAverageHealAmount = samePositionAverageHealAmount;
     }
 
     public void setPairPositionLabels(List<String> pairPositionLabels) {

@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Comparator;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -32,6 +33,11 @@ public class ComboPredictionCsvService {
     private static final int PARTIAL_SLOT_LIMIT = 10;
     private static final Pattern TABLE_NAME_PATTERN = Pattern.compile("^\\d{4}_\\d{2}_\\d{2}_all_predict$");
     private static final DateTimeFormatter TABLE_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy_MM_dd");
+    private static final String SCORE_METRIC_PREDICTED = "predicted_avg_getmmr";
+    private static final String SCORE_METRIC_CHARACTER_SYNERGY = "character_synergy";
+    private static final String SCORE_METRIC_POSITION_AVG_GETMMR = "position_avg_getmmr";
+    private static final double PREDICTED_SCORE_WEIGHT = 0.6;
+    private static final double POSITION_SCORE_WEIGHT = 0.4;
 
     private final JdbcTemplate jdbcTemplate;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -101,6 +107,12 @@ public class ComboPredictionCsvService {
         List<RecommendedCombinationDto> combinations =
                 namedParameterJdbcTemplate.query(sql, parameters, this::mapRecommendedCombination);
         enrichPositionAverages(combinations);
+        applyAbsoluteScores(combinations);
+        combinations.sort(
+                Comparator.comparing(
+                        (RecommendedCombinationDto dto) -> dto.getOverallScore() != null ? dto.getOverallScore() : Double.NEGATIVE_INFINITY
+                ).reversed()
+        );
         return combinations;
     }
 
@@ -253,28 +265,116 @@ public class ComboPredictionCsvService {
     }
 
     private void enrichPositionAverages(List<RecommendedCombinationDto> combinations) {
-        Map<String, PositionAverageStats> statsBySummary = new HashMap<>();
+        Map<String, PositionAverageStats> statsBySignature = new HashMap<>();
 
         for (RecommendedCombinationDto combination : combinations) {
-            List<String> roleNames = resolveRoleNames(combination.getCharacterNums());
-            String positionSummary = resolvePositionSummary(roleNames);
-            combination.setPairPositionLabels(buildPairPositionLabels(roleNames));
-            combination.setPositionSummary(positionSummary);
+            List<CharacterRoleInfo> roleInfos = resolveRoleInfos(combination.getCharacterNums());
+            PositionSignature positionSignature = buildPositionSignature(roleInfos);
+            combination.setPairPositionLabels(buildPairPositionLabels(roleInfos));
+            combination.setPositionSummary(positionSignature.positionFullCombo());
+            combination.setPositionMainCombo(positionSignature.positionMainCombo());
+            combination.setPositionSubCombo(positionSignature.positionSubCombo());
 
-            if (positionSummary == null || positionSummary.isBlank()) {
+            if (positionSignature.signature() == null || positionSignature.signature().isBlank()) {
                 continue;
             }
 
-            PositionAverageStats stats = statsBySummary.computeIfAbsent(
-                    positionSummary,
-                    this::queryWeeklyAverageForSamePositions
+            PositionAverageStats stats = statsBySignature.computeIfAbsent(
+                    positionSignature.signature(),
+                    this::queryCachedPositionStats
             );
             combination.setSamePositionAverageGetmmr(stats.averageGetmmr());
             combination.setSamePositionSampleCount(stats.sampleCount());
+            combination.setSamePositionAverageDamage(stats.averageTotalDamage());
+            combination.setSamePositionAverageHealAmount(stats.averageTotalHealAmount());
         }
     }
 
-    private List<String> resolveRoleNames(List<Integer> characterNums) {
+    private void applyAbsoluteScores(List<RecommendedCombinationDto> combinations) {
+        Map<String, ScoreRange> scoreRanges = queryLatestScoreRanges();
+
+        for (RecommendedCombinationDto combination : combinations) {
+            Double predictedScore = mapToScore(combination.getPredictedAvgGetmmr(), scoreRanges.get(SCORE_METRIC_PREDICTED));
+            combination.setPredictedAvgGetmmrScore(predictedScore);
+            combination.setCharacterSynergy1Score(
+                    mapToScore(combination.getCharacterSynergy1(), scoreRanges.get(SCORE_METRIC_CHARACTER_SYNERGY))
+            );
+            combination.setCharacterSynergy2Score(
+                    mapToScore(combination.getCharacterSynergy2(), scoreRanges.get(SCORE_METRIC_CHARACTER_SYNERGY))
+            );
+            combination.setCharacterSynergy3Score(
+                    mapToScore(combination.getCharacterSynergy3(), scoreRanges.get(SCORE_METRIC_CHARACTER_SYNERGY))
+            );
+            Double positionScore = mapToScore(combination.getSamePositionAverageGetmmr(), scoreRanges.get(SCORE_METRIC_POSITION_AVG_GETMMR));
+            combination.setSamePositionAverageGetmmrScore(positionScore);
+            combination.setOverallScore(computeOverallScore(predictedScore, positionScore));
+        }
+    }
+
+    private Double computeOverallScore(Double predictedScore, Double positionScore) {
+        if (predictedScore == null && positionScore == null) {
+            return null;
+        }
+        if (predictedScore == null) {
+            return positionScore;
+        }
+        if (positionScore == null) {
+            return predictedScore;
+        }
+
+        double overallScore = (predictedScore * PREDICTED_SCORE_WEIGHT) + (positionScore * POSITION_SCORE_WEIGHT);
+        return Math.round(overallScore * 10.0) / 10.0;
+    }
+
+    private Map<String, ScoreRange> queryLatestScoreRanges() {
+        List<ScoreRange> ranges = jdbcTemplate.query(
+                """
+                SELECT
+                    metric_name,
+                    min_value,
+                    max_value,
+                    p05_value,
+                    p95_value
+                FROM daily_score_metric_cache
+                WHERE cutoff_date = (
+                    SELECT MAX(cutoff_date)
+                    FROM daily_score_metric_cache
+                )
+                """,
+                (resultSet, rowNum) -> new ScoreRange(
+                        resultSet.getString("metric_name"),
+                        getNullableDouble(resultSet, "min_value"),
+                        getNullableDouble(resultSet, "max_value"),
+                        getNullableDouble(resultSet, "p05_value"),
+                        getNullableDouble(resultSet, "p95_value")
+                )
+        );
+
+        Map<String, ScoreRange> scoreRangeMap = new HashMap<>();
+        for (ScoreRange range : ranges) {
+            scoreRangeMap.put(range.metricName(), range);
+        }
+        return scoreRangeMap;
+    }
+
+    private Double mapToScore(Double rawValue, ScoreRange scoreRange) {
+        if (rawValue == null || scoreRange == null) {
+            return null;
+        }
+
+        double lowerBound = scoreRange.p05Value() != null ? scoreRange.p05Value() : scoreRange.minValue();
+        double upperBound = scoreRange.p95Value() != null ? scoreRange.p95Value() : scoreRange.maxValue();
+
+        if (lowerBound >= upperBound) {
+            return 100.0;
+        }
+
+        double clampedValue = Math.max(lowerBound, Math.min(rawValue, upperBound));
+        double normalizedScore = ((clampedValue - lowerBound) / (upperBound - lowerBound)) * 100.0;
+        return Math.round(normalizedScore * 10.0) / 10.0;
+    }
+
+    private List<CharacterRoleInfo> resolveRoleInfos(List<Integer> characterNums) {
         if (characterNums == null || characterNums.size() < 3) {
             return List.of();
         }
@@ -287,20 +387,42 @@ public class ComboPredictionCsvService {
         }
 
         return characterInfos.stream()
-                .map(CharacterInfoDto::getDefaultPositionSub)
-                .map(this::normalizePosition)
+                .map(characterInfo -> new CharacterRoleInfo(
+                        normalizePosition(characterInfo.getDefaultPositionMain()),
+                        normalizePosition(characterInfo.getDefaultPositionSub())
+                ))
                 .toList();
     }
 
-    private String resolvePositionSummary(List<String> roleNames) {
-        if (roleNames == null || roleNames.size() < 3) {
-            return null;
+    private PositionSignature buildPositionSignature(List<CharacterRoleInfo> roleInfos) {
+        if (roleInfos == null || roleInfos.size() < 3) {
+            return new PositionSignature(null, null, null, null);
         }
 
-        return roleNames.stream()
+        String positionMainCombo = roleInfos.stream()
+                .map(CharacterRoleInfo::main)
+                .sorted()
+                .reduce((left, right) -> left + "_" + right)
+                .orElse(null);
+
+        String positionSubCombo = roleInfos.stream()
+                .map(CharacterRoleInfo::sub)
+                .sorted()
+                .reduce((left, right) -> left + "_" + right)
+                .orElse(null);
+
+        String positionFullCombo = roleInfos.stream()
+                .map(roleInfo -> roleInfo.main() + ":" + roleInfo.sub())
                 .sorted()
                 .reduce((left, right) -> left + "|" + right)
                 .orElse(null);
+
+        String signature = null;
+        if (positionMainCombo != null && positionSubCombo != null && positionFullCombo != null) {
+            signature = positionMainCombo + "||" + positionSubCombo + "||" + positionFullCombo;
+        }
+
+        return new PositionSignature(signature, positionMainCombo, positionSubCombo, positionFullCombo);
     }
 
     private String normalizePosition(String position) {
@@ -311,64 +433,68 @@ public class ComboPredictionCsvService {
         return position.trim().toLowerCase(Locale.ROOT);
     }
 
-    private PositionAverageStats queryWeeklyAverageForSamePositions(String positionSummary) {
+    private PositionAverageStats queryCachedPositionStats(String positionSignature) {
         return jdbcTemplate.queryForObject(
                 """
-                WITH recent_window AS (
-                    SELECT
-                        DATE_SUB(MAX(startDtm), INTERVAL 7 DAY) AS window_start,
-                        MAX(startDtm) AS window_end
-                    FROM rankdb_v2
-                    WHERE matchingmode = 3
-                ),
-                team_position_stats AS (
-                    SELECT
-                        rr.gameid,
-                        rr.teamNumber,
-                        GROUP_CONCAT(
-                            COALESCE(LOWER(TRIM(cm.default_position_sub)), 'unknown')
-                            ORDER BY COALESCE(LOWER(TRIM(cm.default_position_sub)), 'unknown')
-                            SEPARATOR '|'
-                        ) AS position_summary,
-                        AVG(rr.mmrGain) AS team_avg_getmmr,
-                        COUNT(*) AS member_count
-                    FROM rankdb_v2 rr
-                    JOIN character_master cm
-                      ON cm.characterNum = rr.characterNum
-                    CROSS JOIN recent_window rw
-                    WHERE rr.matchingmode = 3
-                      AND rr.startDtm >= rw.window_start
-                      AND rr.startDtm <= rw.window_end
-                      AND rr.characterNum IS NOT NULL
-                    GROUP BY rr.gameid, rr.teamNumber
-                    HAVING member_count = 3
-                )
                 SELECT
-                    AVG(team_avg_getmmr) AS same_position_avg_getmmr,
-                    COUNT(*) AS sample_count
-                FROM team_position_stats
-                WHERE position_summary = ?
+                    avg_getmmr AS same_position_avg_getmmr,
+                    match_count AS sample_count,
+                    avg_total_damage AS same_position_avg_total_damage,
+                    avg_total_healAmount AS same_position_avg_total_healAmount
+                FROM daily_position_synergy_cache
+                WHERE cutoff_date = (
+                    SELECT MAX(cutoff_date)
+                    FROM daily_position_synergy_cache
+                )
+                  AND position_signature = ?
                 """,
                 (resultSet, rowNum) -> new PositionAverageStats(
                         getNullableDouble(resultSet, "same_position_avg_getmmr"),
-                        resultSet.getInt("sample_count")
+                        resultSet.getInt("sample_count"),
+                        getNullableDouble(resultSet, "same_position_avg_total_damage"),
+                        getNullableDouble(resultSet, "same_position_avg_total_healAmount")
                 ),
-                positionSummary
+                positionSignature
         );
     }
 
-    private List<String> buildPairPositionLabels(List<String> roleNames) {
-        if (roleNames == null || roleNames.size() < 3) {
+    private List<String> buildPairPositionLabels(List<CharacterRoleInfo> roleInfos) {
+        if (roleInfos == null || roleInfos.size() < 3) {
             return List.of();
         }
 
         return List.of(
-                roleNames.get(0) + "+" + roleNames.get(1),
-                roleNames.get(0) + "+" + roleNames.get(2),
-                roleNames.get(1) + "+" + roleNames.get(2)
+                roleInfos.get(0).sub() + "+" + roleInfos.get(1).sub(),
+                roleInfos.get(0).sub() + "+" + roleInfos.get(2).sub(),
+                roleInfos.get(1).sub() + "+" + roleInfos.get(2).sub()
         );
     }
 
-    private record PositionAverageStats(Double averageGetmmr, Integer sampleCount) {
+    private record CharacterRoleInfo(String main, String sub) {
+    }
+
+    private record PositionSignature(
+            String signature,
+            String positionMainCombo,
+            String positionSubCombo,
+            String positionFullCombo
+    ) {
+    }
+
+    private record PositionAverageStats(
+            Double averageGetmmr,
+            Integer sampleCount,
+            Double averageTotalDamage,
+            Double averageTotalHealAmount
+    ) {
+    }
+
+    private record ScoreRange(
+            String metricName,
+            Double minValue,
+            Double maxValue,
+            Double p05Value,
+            Double p95Value
+    ) {
     }
 }

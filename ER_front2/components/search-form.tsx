@@ -7,7 +7,7 @@ import { ChevronDown, ChevronUp, Loader2, Search, User, X } from "lucide-react"
 import { getCharacterImage } from "@/lib/characters"
 import { cn } from "@/lib/utils"
 import { CharacterAvatar } from "@/components/character-avatar"
-import { CharacterSynergyStrip } from "@/components/character-synergy-strip"
+import { CharacterSynergyStrip } from "./character-synergy-strip"
 
 interface SearchCharacter {
   name: string
@@ -20,12 +20,19 @@ interface SearchResult {
   characters: SearchCharacter[]
   grade: string
   score: number
+  rawPredictedAvgGetmmr?: number | null
   inputCombo?: string
   synergyValues?: Array<number | null | undefined>
+  synergyRawValues?: Array<number | null | undefined>
   pairPositionLabels?: Array<string | null | undefined>
   positionSummary?: string
+  positionMainCombo?: string
+  positionSubCombo?: string
   samePositionAverageGetmmr?: number | null
+  samePositionAverageGetmmrScore?: number | null
   samePositionSampleCount?: number | null
+  samePositionAverageDamage?: number | null
+  samePositionAverageHealAmount?: number | null
 }
 
 interface Most3PlayerItem {
@@ -42,15 +49,25 @@ interface RecommendedCombinationItem {
   weaponCodes?: number[]
   characterNames?: string[]
   weaponNames?: string[]
+  overallScore?: number | null
   predictedAvgGetmmr?: number
+  predictedAvgGetmmrScore?: number | null
   inputCombo?: string
   characterSynergy1?: number | null
   characterSynergy2?: number | null
   characterSynergy3?: number | null
+  characterSynergy1Score?: number | null
+  characterSynergy2Score?: number | null
+  characterSynergy3Score?: number | null
   pairPositionLabels?: Array<string | null | undefined>
   samePositionAverageGetmmr?: number | null
+  samePositionAverageGetmmrScore?: number | null
   samePositionSampleCount?: number | null
   positionSummary?: string | null
+  positionMainCombo?: string | null
+  positionSubCombo?: string | null
+  samePositionAverageDamage?: number | null
+  samePositionAverageHealAmount?: number | null
 }
 
 interface PlayerMost3Response {
@@ -83,9 +100,9 @@ const getGradeColor = (grade: string) => {
 }
 
 const calculateGrade = (score: number): string => {
-  if (score >= 9) return "S"
-  if (score >= 7) return "A"
-  if (score >= 5) return "B"
+  if (score >= 90) return "S"
+  if (score >= 75) return "A"
+  if (score >= 60) return "B"
   return "C"
 }
 
@@ -198,7 +215,7 @@ export function SearchForm() {
       // 백엔드 조합 응답을 화면 카드 구조로 정규화해서 렌더링 책임을 단순하게 유지한다.
       const formattedResults: SearchResult[] = recommendedCombinations.map((item, index) => {
         const characterNames = Array.isArray(item.characterNames) ? item.characterNames : []
-        const score = item.predictedAvgGetmmr ?? 0
+        const score = item.overallScore ?? item.predictedAvgGetmmrScore ?? item.predictedAvgGetmmr ?? 0
 
         return {
           id: index + 1,
@@ -209,16 +226,27 @@ export function SearchForm() {
           })),
           grade: calculateGrade(score),
           score,
+          rawPredictedAvgGetmmr: item.predictedAvgGetmmr ?? null,
           inputCombo: item.inputCombo,
           synergyValues: [
+            item.characterSynergy1Score,
+            item.characterSynergy2Score,
+            item.characterSynergy3Score,
+          ],
+          synergyRawValues: [
             item.characterSynergy1,
             item.characterSynergy2,
             item.characterSynergy3,
           ],
           pairPositionLabels: item.pairPositionLabels,
           positionSummary: item.positionSummary ?? undefined,
+          positionMainCombo: item.positionMainCombo ?? undefined,
+          positionSubCombo: item.positionSubCombo ?? undefined,
           samePositionAverageGetmmr: item.samePositionAverageGetmmr ?? null,
+          samePositionAverageGetmmrScore: item.samePositionAverageGetmmrScore ?? null,
           samePositionSampleCount: item.samePositionSampleCount ?? null,
+          samePositionAverageDamage: item.samePositionAverageDamage ?? null,
+          samePositionAverageHealAmount: item.samePositionAverageHealAmount ?? null,
         }
       })
 
@@ -397,18 +425,24 @@ export function SearchForm() {
                     </div>
                   </div>
 
-                  <div className="px-3 pb-3">
-                    <CharacterSynergyStrip
-                      pairPositionLabels={result.pairPositionLabels}
-                      values={result.synergyValues}
-                      positionSummary={result.positionSummary}
-                      samePositionAverageGetmmr={result.samePositionAverageGetmmr}
-                      samePositionSampleCount={result.samePositionSampleCount}
-                    />
-                  </div>
-
                   {expandedResult === result.id && (
                     <div className="border-t border-border bg-background/50 p-4">
+                      <CharacterSynergyStrip
+                        characters={result.characters}
+                        pairPositionLabels={result.pairPositionLabels}
+                        values={result.synergyValues}
+                        rawValues={result.synergyRawValues}
+                        positionSummary={result.positionSummary}
+                        positionMainCombo={result.positionMainCombo}
+                        positionSubCombo={result.positionSubCombo}
+                        samePositionAverageGetmmr={result.samePositionAverageGetmmr}
+                        samePositionAverageGetmmrScore={result.samePositionAverageGetmmrScore}
+                        samePositionSampleCount={result.samePositionSampleCount}
+                        samePositionAverageDamage={result.samePositionAverageDamage}
+                        samePositionAverageHealAmount={result.samePositionAverageHealAmount}
+                        className="mb-4"
+                      />
+
                       <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
                         <div>
                           <span className="text-muted-foreground">Input combo</span>
@@ -417,9 +451,12 @@ export function SearchForm() {
                           </p>
                         </div>
                         <div>
-                          <span className="text-muted-foreground">Predicted average MMR</span>
+                          <span className="text-muted-foreground">Overall score / raw MMR</span>
                           <p className="font-medium text-foreground">
-                            {result.score.toFixed(2)}
+                            {result.score.toFixed(1)} / {typeof result.rawPredictedAvgGetmmr === "number" ? result.rawPredictedAvgGetmmr.toFixed(2) : "N/A"}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground">
+                            0.6 x 예측점수 + 0.4 x 포지션점수
                           </p>
                         </div>
                       </div>

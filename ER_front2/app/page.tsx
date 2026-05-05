@@ -10,13 +10,13 @@ const features = [
   },
   {
     icon: Clock,
-    title: "Fast look",
-    description: "Search one to three players and review the recommended trio instantly.",
+    title: "닥지지를 사용하면 입력이 편해요!",
+    description: "닥지지의 멀티서치 앱을 활용하면 닉네임 붙여넣기가 편해집니다",
   },
   {
     icon: Shield,
-    title: "Team synergy",
-    description: "Compare combinations and spot safer, higher-value team setups.",
+    title: "메타를 더 잘볼수있어요!!",
+    description: "요즘 어떤 험체가 좋은지 통계를 종합해서 티어로 보여드립니다.",
   },
 ]
 

@@ -23,7 +23,7 @@ import {
 import { characters, getCharacterImage, getCharacterWeaponCode } from "@/lib/characters"
 import { cn } from "@/lib/utils"
 import { CharacterAvatar } from "@/components/character-avatar"
-import { CharacterSynergyStrip } from "@/components/character-synergy-strip"
+import { CharacterSynergyStrip } from "../../components/character-synergy-strip"
 
 interface SimulatorResult {
   id: number
@@ -31,13 +31,20 @@ interface SimulatorResult {
   weaponCodes?: number[]
   score: number
   grade: string
+  rawPredictedAvgGetmmr?: number | null
   playerNames?: string[]
   characterPools?: number[][]
   synergyValues?: Array<number | null | undefined>
+  synergyRawValues?: Array<number | null | undefined>
   pairPositionLabels?: Array<string | null | undefined>
   positionSummary?: string
+  positionMainCombo?: string
+  positionSubCombo?: string
   samePositionAverageGetmmr?: number | null
+  samePositionAverageGetmmrScore?: number | null
   samePositionSampleCount?: number | null
+  samePositionAverageDamage?: number | null
+  samePositionAverageHealAmount?: number | null
 }
 
 interface TeamMember {
@@ -60,9 +67,9 @@ const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080"
 
 const calculateGrade = (score: number): string => {
-  if (score >= 9) return "S"
-  if (score >= 7) return "A"
-  if (score >= 5) return "B"
+  if (score >= 90) return "S"
+  if (score >= 75) return "A"
+  if (score >= 60) return "B"
   return "C"
 }
 
@@ -288,19 +295,30 @@ export default function SimulatorPage() {
             id: index + 1,
             members: Array.isArray(item.characterNames) ? item.characterNames : [],
             weaponCodes: Array.isArray(item.weaponCodes) ? item.weaponCodes : [],
-            score: item.predictedAvgGetmmr || 0,
-            grade: calculateGrade(item.predictedAvgGetmmr || 0),
+            score: item.overallScore ?? item.predictedAvgGetmmrScore ?? item.predictedAvgGetmmr ?? 0,
+            grade: calculateGrade(item.overallScore ?? item.predictedAvgGetmmrScore ?? item.predictedAvgGetmmr ?? 0),
+            rawPredictedAvgGetmmr: item.predictedAvgGetmmr ?? null,
             playerNames: requestPlayerNames,
             characterPools: resolvedPools,
             synergyValues: [
+              item.characterSynergy1Score,
+              item.characterSynergy2Score,
+              item.characterSynergy3Score,
+            ],
+            synergyRawValues: [
               item.characterSynergy1,
               item.characterSynergy2,
               item.characterSynergy3,
             ],
             pairPositionLabels: item.pairPositionLabels,
             positionSummary: item.positionSummary ?? undefined,
+            positionMainCombo: item.positionMainCombo ?? undefined,
+            positionSubCombo: item.positionSubCombo ?? undefined,
             samePositionAverageGetmmr: item.samePositionAverageGetmmr ?? null,
+            samePositionAverageGetmmrScore: item.samePositionAverageGetmmrScore ?? null,
             samePositionSampleCount: item.samePositionSampleCount ?? null,
+            samePositionAverageDamage: item.samePositionAverageDamage ?? null,
+            samePositionAverageHealAmount: item.samePositionAverageHealAmount ?? null,
           }))
         : []
 
@@ -582,18 +600,29 @@ export default function SimulatorPage() {
                     </div>
                   </div>
 
-                  <div className="px-4 pb-4">
-                    <CharacterSynergyStrip
-                      pairPositionLabels={result.pairPositionLabels}
-                      values={result.synergyValues}
-                      positionSummary={result.positionSummary}
-                      samePositionAverageGetmmr={result.samePositionAverageGetmmr}
-                      samePositionSampleCount={result.samePositionSampleCount}
-                    />
-                  </div>
-
                   {expandedResult === result.id && (
                     <div className="border-t border-border p-4">
+                      <CharacterSynergyStrip
+                        characters={result.members.map((memberName, index) => ({
+                          name: memberName,
+                          image: getCharacterImage(memberName),
+                          weaponCode:
+                            result.weaponCodes?.[index] ?? getCharacterWeaponCode(memberName),
+                        }))}
+                        pairPositionLabels={result.pairPositionLabels}
+                        values={result.synergyValues}
+                        rawValues={result.synergyRawValues}
+                        positionSummary={result.positionSummary}
+                        positionMainCombo={result.positionMainCombo}
+                        positionSubCombo={result.positionSubCombo}
+                        samePositionAverageGetmmr={result.samePositionAverageGetmmr}
+                        samePositionAverageGetmmrScore={result.samePositionAverageGetmmrScore}
+                        samePositionSampleCount={result.samePositionSampleCount}
+                        samePositionAverageDamage={result.samePositionAverageDamage}
+                        samePositionAverageHealAmount={result.samePositionAverageHealAmount}
+                        className="mb-4"
+                      />
+
                       <div className="space-y-2 text-sm text-muted-foreground">
                         <p>
                           {result.characterPools?.length === 2
@@ -611,6 +640,7 @@ export default function SimulatorPage() {
                               .join(" x ")}
                           </p>
                         )}
+                        <p>Score formula: 0.6 x predicted score + 0.4 x position score</p>
                       </div>
                     </div>
                   )}

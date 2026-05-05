@@ -132,7 +132,8 @@ class ERDBClassification:
         primary_keys = primary_keys or []
         create_df = df.copy()
 
-        def mysql_type(dtype):
+        def mysql_type(column_name, series):
+            dtype = series.dtype
             if pd.api.types.is_integer_dtype(dtype):
                 return "BIGINT"
             if pd.api.types.is_float_dtype(dtype):
@@ -141,12 +142,18 @@ class ERDBClassification:
                 return "TINYINT(1)"
             if pd.api.types.is_datetime64_any_dtype(dtype):
                 return "DATETIME"
+            if column_name in primary_keys:
+                non_null_series = series.dropna().astype(str)
+                max_length = int(non_null_series.map(len).max()) if not non_null_series.empty else 32
+                if column_name == 'cutoff_date':
+                    return "VARCHAR(10)"
+                return f"VARCHAR({min(max(max_length, 32), 512)})"
             return "TEXT"
 
         column_defs = []
         for col in create_df.columns:
             null_sql = "NOT NULL" if col in primary_keys else "DEFAULT NULL"
-            column_defs.append(f"`{col}` {mysql_type(create_df[col].dtype)} {null_sql}")
+            column_defs.append(f"`{col}` {mysql_type(col, create_df[col])} {null_sql}")
         pk_sql = f", PRIMARY KEY ({', '.join(f'`{key}`' for key in primary_keys)})" if primary_keys else ""
         create_sql = f"""
         CREATE TABLE `{table_name}` (
@@ -343,6 +350,146 @@ class ERDBClassification:
             primary_keys=['gameid', 'teamNumber'],
         )
         return train_base_df
+
+    def build_position_synergy_cache_df(self, train_base_df=None, cutoff_date=None):
+        if train_base_df is None:
+            if self.df is not None and not self.df.empty:
+                train_base_df = self.df.copy()
+            else:
+                train_base_df = pd.read_sql("SELECT * FROM `rankdb_train_base`", self.conn)
+
+        if train_base_df.empty:
+            raise ValueError("No train base data available for position synergy cache.")
+
+        cache_df = train_base_df.copy()
+        position_main_cols = ['position_main_1', 'position_main_2', 'position_main_3']
+        position_sub_cols = ['position_sub_1', 'position_sub_2', 'position_sub_3']
+
+        for col in position_main_cols + position_sub_cols:
+            if col not in cache_df.columns:
+                raise ValueError(f"Missing required column for position synergy cache: {col}")
+
+        cache_df['position_main_combo'] = cache_df[position_main_cols].apply(
+            lambda row: '_'.join(sorted([str(value) for value in row.tolist() if pd.notna(value)])),
+            axis=1,
+        )
+        cache_df['position_sub_combo'] = cache_df[position_sub_cols].apply(
+            lambda row: '_'.join(sorted([str(value) for value in row.tolist() if pd.notna(value)])),
+            axis=1,
+        )
+        cache_df['position_full_combo'] = cache_df.apply(
+            lambda row: '|'.join(
+                sorted(
+                    [
+                        f"{row[f'position_main_{idx}']}:{row[f'position_sub_{idx}']}"
+                        for idx in range(1, 4)
+                        if pd.notna(row.get(f'position_main_{idx}')) and pd.notna(row.get(f'position_sub_{idx}'))
+                    ]
+                )
+            ),
+            axis=1,
+        )
+        cache_df['position_signature'] = (
+            cache_df['position_main_combo']
+            + '||'
+            + cache_df['position_sub_combo']
+            + '||'
+            + cache_df['position_full_combo']
+        )
+
+        grouped = (
+            cache_df.groupby(
+                ['position_signature', 'position_main_combo', 'position_sub_combo', 'position_full_combo'],
+                dropna=False,
+            )
+            .agg(
+                match_count=('gameid', 'size'),
+                avg_getmmr=('avg_getmmr', 'mean'),
+                avg_rankpoint=('avg_rankpoint', 'mean'),
+                avg_ranktier=('avg_ranktier', 'mean'),
+                avg_total_damage=('total_damage', 'mean'),
+                avg_damage_std=('damage_std', 'mean'),
+                avg_total_healAmount=('total_healAmount', 'mean'),
+            )
+            .reset_index()
+            .sort_values(['match_count', 'avg_getmmr'], ascending=[False, False])
+            .reset_index(drop=True)
+        )
+
+        grouped.insert(0, 'cutoff_date', str(cutoff_date) if cutoff_date is not None else None)
+        return grouped
+
+    def save_position_synergy_cache(self, cache_df, table_name='daily_position_synergy_cache'):
+        self.save_dataframe_to_mysql(
+            cache_df,
+            table_name=table_name,
+            primary_keys=['cutoff_date', 'position_signature'],
+        )
+        return table_name
+
+    def load_position_synergy_cache(self, table_name='daily_position_synergy_cache'):
+        return pd.read_sql(f"SELECT * FROM `{table_name}`", self.conn)
+
+    def build_absolute_score_cache_df(
+        self,
+        prediction_df,
+        position_synergy_cache_df,
+        cutoff_date=None,
+    ):
+        if prediction_df is None or prediction_df.empty:
+            raise ValueError("Prediction dataframe is required to build absolute score cache.")
+        if position_synergy_cache_df is None or position_synergy_cache_df.empty:
+            raise ValueError("Position synergy cache dataframe is required to build absolute score cache.")
+
+        def summarize_metric(metric_name, series):
+            clean_series = pd.to_numeric(series, errors='coerce')
+            clean_series = clean_series[np.isfinite(clean_series)]
+            if clean_series.empty:
+                return None
+
+            return {
+                'cutoff_date': str(cutoff_date) if cutoff_date is not None else None,
+                'metric_name': metric_name,
+                'sample_count': int(clean_series.shape[0]),
+                'min_value': float(clean_series.min()),
+                'max_value': float(clean_series.max()),
+                'p05_value': float(clean_series.quantile(0.05)),
+                'p95_value': float(clean_series.quantile(0.95)),
+            }
+
+        rows = []
+        predicted_row = summarize_metric('predicted_avg_getmmr', prediction_df.get('predicted_avg_getmmr'))
+        if predicted_row is not None:
+            rows.append(predicted_row)
+
+        synergy_columns = ['character_synergy_1', 'character_synergy_2', 'character_synergy_3']
+        synergy_series = pd.concat(
+            [prediction_df[col] for col in synergy_columns if col in prediction_df.columns],
+            ignore_index=True,
+        )
+        synergy_row = summarize_metric('character_synergy', synergy_series)
+        if synergy_row is not None:
+            rows.append(synergy_row)
+
+        position_row = summarize_metric('position_avg_getmmr', position_synergy_cache_df.get('avg_getmmr'))
+        if position_row is not None:
+            rows.append(position_row)
+
+        if not rows:
+            raise ValueError("No score metrics could be summarized.")
+
+        return pd.DataFrame(rows)
+
+    def save_absolute_score_cache(self, cache_df, table_name='daily_score_metric_cache'):
+        self.save_dataframe_to_mysql(
+            cache_df,
+            table_name=table_name,
+            primary_keys=['cutoff_date', 'metric_name'],
+        )
+        return table_name
+
+    def load_absolute_score_cache(self, table_name='daily_score_metric_cache'):
+        return pd.read_sql(f"SELECT * FROM `{table_name}`", self.conn)
 
     def load_master_name_maps(self):
         if self.character_name_map and self.weapon_name_map:

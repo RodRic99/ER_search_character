@@ -1,0 +1,360 @@
+> Task :compileJava UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :resolveMainClassName
+
+> Task :bootRun
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.5)
+
+2026-05-05T08:35:43.943+09:00  INFO 226652 --- [ER_server] [  restartedMain] c.rodric.ER_server.ErServerApplication   : Starting ErServerApplication using Java 17.0.13 with PID 226652 (C:\Users\wnsgu\OneDrive\πŸ≈¡ »≠∏È\CapStone\ER_search_character\ER_server\ER_server\build\classes\java\main started by RodRic in C:\Users\wnsgu\OneDrive\πŸ≈¡ »≠∏È\CapStone\ER_search_character\ER_server\ER_server)
+2026-05-05T08:35:43.947+09:00  INFO 226652 --- [ER_server] [  restartedMain] c.rodric.ER_server.ErServerApplication   : No active profile set, falling back to 1 default profile: "default"
+2026-05-05T08:35:43.979+09:00  INFO 226652 --- [ER_server] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-05-05T08:35:43.979+09:00  INFO 226652 --- [ER_server] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-05-05T08:35:44.317+09:00  INFO 226652 --- [ER_server] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-05T08:35:44.354+09:00  INFO 226652 --- [ER_server] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 32 ms. Found 2 JPA repository interfaces.
+2026-05-05T08:35:44.689+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8081 (http)
+2026-05-05T08:35:44.699+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-05T08:35:44.699+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.20]
+2026-05-05T08:35:44.727+09:00  INFO 226652 --- [ER_server] [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 746 ms
+2026-05-05T08:35:44.830+09:00  INFO 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-05-05T08:35:44.866+09:00  INFO 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.7.Final
+2026-05-05T08:35:45.179+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-05T08:35:45.201+09:00  INFO 226652 --- [ER_server] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-05-05T08:35:45.374+09:00  INFO 226652 --- [ER_server] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@2deff07e
+2026-05-05T08:35:45.375+09:00  INFO 226652 --- [ER_server] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-05-05T08:35:45.411+09:00  WARN 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-05-05T08:35:45.423+09:00  INFO 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/er_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 8.0.40
+	Default catalog/schema: er_db/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-05-05T08:35:45.979+09:00  INFO 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-05T08:35:46.029+09:00  INFO 226652 --- [ER_server] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-05T08:35:46.130+09:00  WARN 226652 --- [ER_server] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-05-05T08:35:46.322+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-05-05T08:35:46.464+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8081 (http) with context path '/'
+2026-05-05T08:35:46.467+09:00  INFO 226652 --- [ER_server] [  restartedMain] c.rodric.ER_server.ErServerApplication   : Started ErServerApplication in 2.9 seconds (process running for 3.22)
+2026-05-05T08:35:56.345+09:00  INFO 226652 --- [ER_server] [nio-8081-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-05-05T08:35:56.345+09:00  INFO 226652 --- [ER_server] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-05-05T08:35:56.346+09:00  INFO 226652 --- [ER_server] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-05-05T08:35:56.832+09:00  INFO 226652 --- [ER_server] [nio-8081-exec-1] c.r.E.service.CharacterMasterService     : Character mapping request codes=[38, 40, 70], foundCount=3, result={38=com.rodric.ER_server.dto.CharacterInfoDto@34d31bf, 70=com.rodric.ER_server.dto.CharacterInfoDto@2f8b8340, 40=com.rodric.ER_server.dto.CharacterInfoDto@6d5354d1}
+2026-05-05T08:44:21.204+09:00  INFO 226652 --- [ER_server] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 6 class path changes (0 additions, 6 deletions, 0 modifications)
+2026-05-05T08:44:21.207+09:00  INFO 226652 --- [ER_server] [       Thread-1] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-05-05T08:44:21.260+09:00  INFO 226652 --- [ER_server] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+2026-05-05T08:44:21.262+09:00  INFO 226652 --- [ER_server] [       Thread-1] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-05T08:44:21.266+09:00  INFO 226652 --- [ER_server] [       Thread-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-05-05T08:44:21.272+09:00  INFO 226652 --- [ER_server] [       Thread-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.5)
+
+2026-05-05T08:44:21.336+09:00  INFO 226652 --- [ER_server] [  restartedMain] c.rodric.ER_server.ErServerApplication   : Starting ErServerApplication using Java 17.0.13 with PID 226652 (C:\Users\wnsgu\OneDrive\πŸ≈¡ »≠∏È\CapStone\ER_search_character\ER_server\ER_server\build\classes\java\main started by RodRic in C:\Users\wnsgu\OneDrive\πŸ≈¡ »≠∏È\CapStone\ER_search_character\ER_server\ER_server)
+2026-05-05T08:44:21.336+09:00  INFO 226652 --- [ER_server] [  restartedMain] c.rodric.ER_server.ErServerApplication   : No active profile set, falling back to 1 default profile: "default"
+2026-05-05T08:44:21.481+09:00  INFO 226652 --- [ER_server] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-05T08:44:21.494+09:00  INFO 226652 --- [ER_server] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 12 ms. Found 2 JPA repository interfaces.
+2026-05-05T08:44:21.569+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8081 (http)
+2026-05-05T08:44:21.570+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-05T08:44:21.570+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.20]
+2026-05-05T08:44:21.585+09:00  INFO 226652 --- [ER_server] [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 247 ms
+2026-05-05T08:44:21.617+09:00  INFO 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-05-05T08:44:21.657+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-05T08:44:21.658+09:00  INFO 226652 --- [ER_server] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+2026-05-05T08:44:21.671+09:00  INFO 226652 --- [ER_server] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Added connection com.mysql.cj.jdbc.ConnectionImpl@64e9485
+2026-05-05T08:44:21.671+09:00  INFO 226652 --- [ER_server] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+2026-05-05T08:44:21.672+09:00  WARN 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-05-05T08:44:21.674+09:00  INFO 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/er_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 8.0.40
+	Default catalog/schema: er_db/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-05-05T08:44:21.712+09:00  INFO 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-05T08:44:21.732+09:00  INFO 226652 --- [ER_server] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-05T08:44:21.770+09:00  WARN 226652 --- [ER_server] [  restartedMain] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'playerStatInfoController' defined in file [C:\Users\wnsgu\OneDrive\πŸ≈¡ »≠∏È\CapStone\ER_search_character\ER_server\ER_server\build\classes\java\main\com\rodric\ER_server\controller\PlayerStatInfoController.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'playerStatInfoService' defined in file [C:\Users\wnsgu\OneDrive\πŸ≈¡ »≠∏È\CapStone\ER_search_character\ER_server\ER_server\build\classes\java\main\com\rodric\ER_server\service\PlayerStatInfoService.class]: Unsatisfied dependency expressed through constructor parameter 3: No qualifying bean of type 'com.rodric.ER_server.service.ComboPredictionCsvService' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+2026-05-05T08:44:21.770+09:00  INFO 226652 --- [ER_server] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-05T08:44:21.771+09:00  INFO 226652 --- [ER_server] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Shutdown initiated...
+2026-05-05T08:44:21.772+09:00  INFO 226652 --- [ER_server] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Shutdown completed.
+2026-05-05T08:44:21.773+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.apache.catalina.core.StandardService   : Stopping service [Tomcat]
+2026-05-05T08:44:21.776+09:00  INFO 226652 --- [ER_server] [  restartedMain] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-05-05T08:44:21.791+09:00 ERROR 226652 --- [ER_server] [  restartedMain] o.s.b.d.LoggingFailureAnalysisReporter   : 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Parameter 3 of constructor in com.rodric.ER_server.service.PlayerStatInfoService required a bean of type 'com.rodric.ER_server.service.ComboPredictionCsvService' that could not be found.
+
+
+Action:
+
+Consider defining a bean of type 'com.rodric.ER_server.service.ComboPredictionCsvService' in your configuration.
+
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.5)
+
+2026-05-05T08:44:23.247+09:00  INFO 226652 --- [ER_server] [  restartedMain] c.rodric.ER_server.ErServerApplication   : Starting ErServerApplication using Java 17.0.13 with PID 226652 (C:\Users\wnsgu\OneDrive\πŸ≈¡ »≠∏È\CapStone\ER_search_character\ER_server\ER_server\build\classes\java\main started by RodRic in C:\Users\wnsgu\OneDrive\πŸ≈¡ »≠∏È\CapStone\ER_search_character\ER_server\ER_server)
+2026-05-05T08:44:23.247+09:00  INFO 226652 --- [ER_server] [  restartedMain] c.rodric.ER_server.ErServerApplication   : No active profile set, falling back to 1 default profile: "default"
+2026-05-05T08:44:23.346+09:00  INFO 226652 --- [ER_server] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-05T08:44:23.353+09:00  INFO 226652 --- [ER_server] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 6 ms. Found 2 JPA repository interfaces.
+2026-05-05T08:44:23.396+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8081 (http)
+2026-05-05T08:44:23.397+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-05T08:44:23.397+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.20]
+2026-05-05T08:44:23.408+09:00  INFO 226652 --- [ER_server] [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 159 ms
+2026-05-05T08:44:23.427+09:00  INFO 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-05-05T08:44:23.449+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-05T08:44:23.450+09:00  INFO 226652 --- [ER_server] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Starting...
+2026-05-05T08:44:23.459+09:00  INFO 226652 --- [ER_server] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Added connection com.mysql.cj.jdbc.ConnectionImpl@6e12d025
+2026-05-05T08:44:23.459+09:00  INFO 226652 --- [ER_server] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Start completed.
+2026-05-05T08:44:23.460+09:00  WARN 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-05-05T08:44:23.460+09:00  INFO 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/er_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 8.0.40
+	Default catalog/schema: er_db/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-05-05T08:44:23.488+09:00  INFO 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-05T08:44:23.501+09:00  INFO 226652 --- [ER_server] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-05T08:44:23.539+09:00  WARN 226652 --- [ER_server] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-05-05T08:44:23.615+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8081 (http) with context path '/'
+2026-05-05T08:44:23.616+09:00  INFO 226652 --- [ER_server] [  restartedMain] c.rodric.ER_server.ErServerApplication   : Started ErServerApplication in 0.387 seconds (process running for 520.369)
+2026-05-05T08:44:23.617+09:00  INFO 226652 --- [ER_server] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-05-05T08:44:36.027+09:00  INFO 226652 --- [ER_server] [nio-8081-exec-1] o.a.c.c.C.[Tomcat-1].[localhost].[/]     : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-05-05T08:44:36.027+09:00  INFO 226652 --- [ER_server] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-05-05T08:44:36.028+09:00  INFO 226652 --- [ER_server] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-05-05T08:44:36.355+09:00  INFO 226652 --- [ER_server] [nio-8081-exec-1] c.r.E.service.CharacterMasterService     : Character mapping request codes=[38, 40, 70], foundCount=3, result={38=com.rodric.ER_server.dto.CharacterInfoDto@48fcb06b, 70=com.rodric.ER_server.dto.CharacterInfoDto@25671783, 40=com.rodric.ER_server.dto.CharacterInfoDto@5e334801}
+2026-05-05T09:43:34.536+09:00  INFO 226652 --- [ER_server] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 10 class path changes (0 additions, 10 deletions, 0 modifications)
+2026-05-05T09:43:34.547+09:00  INFO 226652 --- [ER_server] [       Thread-5] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-05-05T09:43:34.615+09:00  INFO 226652 --- [ER_server] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+2026-05-05T09:43:34.618+09:00  INFO 226652 --- [ER_server] [       Thread-5] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-05T09:43:34.622+09:00  INFO 226652 --- [ER_server] [       Thread-5] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Shutdown initiated...
+2026-05-05T09:43:34.627+09:00  INFO 226652 --- [ER_server] [       Thread-5] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.5)
+
+2026-05-05T09:43:34.772+09:00  INFO 226652 --- [ER_server] [  restartedMain] c.rodric.ER_server.ErServerApplication   : Starting ErServerApplication using Java 17.0.13 with PID 226652 (C:\Users\wnsgu\OneDrive\πŸ≈¡ »≠∏È\CapStone\ER_search_character\ER_server\ER_server\build\classes\java\main started by RodRic in C:\Users\wnsgu\OneDrive\πŸ≈¡ »≠∏È\CapStone\ER_search_character\ER_server\ER_server)
+2026-05-05T09:43:34.772+09:00  INFO 226652 --- [ER_server] [  restartedMain] c.rodric.ER_server.ErServerApplication   : No active profile set, falling back to 1 default profile: "default"
+2026-05-05T09:43:34.907+09:00  INFO 226652 --- [ER_server] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-05T09:43:34.918+09:00  INFO 226652 --- [ER_server] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 9 ms. Found 2 JPA repository interfaces.
+2026-05-05T09:43:34.992+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8081 (http)
+2026-05-05T09:43:34.993+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-05T09:43:34.994+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.20]
+2026-05-05T09:43:35.006+09:00  INFO 226652 --- [ER_server] [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 231 ms
+2026-05-05T09:43:35.028+09:00  INFO 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-05-05T09:43:35.057+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-05T09:43:35.058+09:00  INFO 226652 --- [ER_server] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Starting...
+2026-05-05T09:43:35.067+09:00  INFO 226652 --- [ER_server] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - Added connection com.mysql.cj.jdbc.ConnectionImpl@1d109a4a
+2026-05-05T09:43:35.067+09:00  INFO 226652 --- [ER_server] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Start completed.
+2026-05-05T09:43:35.068+09:00  WARN 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-05-05T09:43:35.069+09:00  INFO 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/er_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 8.0.40
+	Default catalog/schema: er_db/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-05-05T09:43:35.099+09:00  INFO 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-05T09:43:35.114+09:00  INFO 226652 --- [ER_server] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-05T09:43:35.144+09:00  WARN 226652 --- [ER_server] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-05-05T09:43:35.217+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8081 (http) with context path '/'
+2026-05-05T09:43:35.220+09:00  INFO 226652 --- [ER_server] [  restartedMain] c.rodric.ER_server.ErServerApplication   : Started ErServerApplication in 0.474 seconds (process running for 4071.972)
+2026-05-05T09:43:35.221+09:00  INFO 226652 --- [ER_server] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-05-05T09:43:36.684+09:00  INFO 226652 --- [ER_server] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 10 class path changes (10 additions, 0 deletions, 0 modifications)
+2026-05-05T09:43:36.695+09:00  INFO 226652 --- [ER_server] [      Thread-12] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-05-05T09:43:36.811+09:00  INFO 226652 --- [ER_server] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+2026-05-05T09:43:36.812+09:00  INFO 226652 --- [ER_server] [      Thread-12] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-05T09:43:36.813+09:00  INFO 226652 --- [ER_server] [      Thread-12] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Shutdown initiated...
+2026-05-05T09:43:36.817+09:00  INFO 226652 --- [ER_server] [      Thread-12] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.5)
+
+2026-05-05T09:43:36.895+09:00  INFO 226652 --- [ER_server] [  restartedMain] c.rodric.ER_server.ErServerApplication   : Starting ErServerApplication using Java 17.0.13 with PID 226652 (C:\Users\wnsgu\OneDrive\πŸ≈¡ »≠∏È\CapStone\ER_search_character\ER_server\ER_server\build\classes\java\main started by RodRic in C:\Users\wnsgu\OneDrive\πŸ≈¡ »≠∏È\CapStone\ER_search_character\ER_server\ER_server)
+2026-05-05T09:43:36.895+09:00  INFO 226652 --- [ER_server] [  restartedMain] c.rodric.ER_server.ErServerApplication   : No active profile set, falling back to 1 default profile: "default"
+2026-05-05T09:43:37.036+09:00  INFO 226652 --- [ER_server] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-05T09:43:37.045+09:00  INFO 226652 --- [ER_server] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 7 ms. Found 2 JPA repository interfaces.
+2026-05-05T09:43:37.085+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8081 (http)
+2026-05-05T09:43:37.086+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-05T09:43:37.086+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.20]
+2026-05-05T09:43:37.104+09:00  INFO 226652 --- [ER_server] [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 207 ms
+2026-05-05T09:43:37.136+09:00  INFO 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-05-05T09:43:37.174+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-05T09:43:37.175+09:00  INFO 226652 --- [ER_server] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Starting...
+2026-05-05T09:43:37.186+09:00  INFO 226652 --- [ER_server] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-5 - Added connection com.mysql.cj.jdbc.ConnectionImpl@5a7cd747
+2026-05-05T09:43:37.187+09:00  INFO 226652 --- [ER_server] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Start completed.
+2026-05-05T09:43:37.188+09:00  WARN 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-05-05T09:43:37.188+09:00  INFO 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/er_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 8.0.40
+	Default catalog/schema: er_db/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-05-05T09:43:37.219+09:00  INFO 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-05T09:43:37.234+09:00  INFO 226652 --- [ER_server] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-05T09:43:37.268+09:00  WARN 226652 --- [ER_server] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-05-05T09:43:37.340+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8081 (http) with context path '/'
+2026-05-05T09:43:37.341+09:00  INFO 226652 --- [ER_server] [  restartedMain] c.rodric.ER_server.ErServerApplication   : Started ErServerApplication in 0.467 seconds (process running for 4074.094)
+2026-05-05T09:43:37.343+09:00  INFO 226652 --- [ER_server] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-05-05T09:44:28.161+09:00  INFO 226652 --- [ER_server] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 10 class path changes (0 additions, 0 deletions, 10 modifications)
+2026-05-05T09:44:28.162+09:00  INFO 226652 --- [ER_server] [      Thread-16] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-05-05T09:44:28.207+09:00  INFO 226652 --- [ER_server] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+2026-05-05T09:44:28.208+09:00  INFO 226652 --- [ER_server] [      Thread-16] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-05T09:44:28.209+09:00  INFO 226652 --- [ER_server] [      Thread-16] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Shutdown initiated...
+2026-05-05T09:44:28.211+09:00  INFO 226652 --- [ER_server] [      Thread-16] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.5)
+
+2026-05-05T09:44:28.273+09:00  INFO 226652 --- [ER_server] [  restartedMain] c.rodric.ER_server.ErServerApplication   : Starting ErServerApplication using Java 17.0.13 with PID 226652 (C:\Users\wnsgu\OneDrive\πŸ≈¡ »≠∏È\CapStone\ER_search_character\ER_server\ER_server\build\classes\java\main started by RodRic in C:\Users\wnsgu\OneDrive\πŸ≈¡ »≠∏È\CapStone\ER_search_character\ER_server\ER_server)
+2026-05-05T09:44:28.273+09:00  INFO 226652 --- [ER_server] [  restartedMain] c.rodric.ER_server.ErServerApplication   : No active profile set, falling back to 1 default profile: "default"
+2026-05-05T09:44:28.356+09:00  INFO 226652 --- [ER_server] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-05T09:44:28.364+09:00  INFO 226652 --- [ER_server] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 7 ms. Found 2 JPA repository interfaces.
+2026-05-05T09:44:28.404+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8081 (http)
+2026-05-05T09:44:28.404+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-05T09:44:28.404+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.20]
+2026-05-05T09:44:28.413+09:00  INFO 226652 --- [ER_server] [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 137 ms
+2026-05-05T09:44:28.432+09:00  INFO 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-05-05T09:44:28.454+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-05T09:44:28.454+09:00  INFO 226652 --- [ER_server] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Starting...
+2026-05-05T09:44:28.462+09:00  INFO 226652 --- [ER_server] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-6 - Added connection com.mysql.cj.jdbc.ConnectionImpl@46f862e0
+2026-05-05T09:44:28.462+09:00  INFO 226652 --- [ER_server] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Start completed.
+2026-05-05T09:44:28.463+09:00  WARN 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-05-05T09:44:28.463+09:00  INFO 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/er_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 8.0.40
+	Default catalog/schema: er_db/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-05-05T09:44:28.486+09:00  INFO 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-05T09:44:28.498+09:00  INFO 226652 --- [ER_server] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-05T09:44:28.527+09:00  WARN 226652 --- [ER_server] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-05-05T09:44:28.589+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8081 (http) with context path '/'
+2026-05-05T09:44:28.590+09:00  INFO 226652 --- [ER_server] [  restartedMain] c.rodric.ER_server.ErServerApplication   : Started ErServerApplication in 0.331 seconds (process running for 4125.342)
+2026-05-05T09:44:28.591+09:00  INFO 226652 --- [ER_server] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-05-05T09:53:05.841+09:00  INFO 226652 --- [ER_server] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 7 class path changes (0 additions, 0 deletions, 7 modifications)
+2026-05-05T09:53:05.842+09:00  INFO 226652 --- [ER_server] [      Thread-20] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-05-05T09:53:05.886+09:00  INFO 226652 --- [ER_server] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+2026-05-05T09:53:05.888+09:00  INFO 226652 --- [ER_server] [      Thread-20] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-05T09:53:05.888+09:00  INFO 226652 --- [ER_server] [      Thread-20] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Shutdown initiated...
+2026-05-05T09:53:05.890+09:00  INFO 226652 --- [ER_server] [      Thread-20] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.5)
+
+2026-05-05T09:53:05.956+09:00  INFO 226652 --- [ER_server] [  restartedMain] c.rodric.ER_server.ErServerApplication   : Starting ErServerApplication using Java 17.0.13 with PID 226652 (C:\Users\wnsgu\OneDrive\πŸ≈¡ »≠∏È\CapStone\ER_search_character\ER_server\ER_server\build\classes\java\main started by RodRic in C:\Users\wnsgu\OneDrive\πŸ≈¡ »≠∏È\CapStone\ER_search_character\ER_server\ER_server)
+2026-05-05T09:53:05.957+09:00  INFO 226652 --- [ER_server] [  restartedMain] c.rodric.ER_server.ErServerApplication   : No active profile set, falling back to 1 default profile: "default"
+2026-05-05T09:53:06.051+09:00  INFO 226652 --- [ER_server] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-05T09:53:06.059+09:00  INFO 226652 --- [ER_server] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 7 ms. Found 2 JPA repository interfaces.
+2026-05-05T09:53:06.107+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8081 (http)
+2026-05-05T09:53:06.108+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-05T09:53:06.108+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.20]
+2026-05-05T09:53:06.120+09:00  INFO 226652 --- [ER_server] [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 160 ms
+2026-05-05T09:53:06.143+09:00  INFO 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-05-05T09:53:06.176+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-05T09:53:06.178+09:00  INFO 226652 --- [ER_server] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-7 - Starting...
+2026-05-05T09:53:06.188+09:00  INFO 226652 --- [ER_server] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-7 - Added connection com.mysql.cj.jdbc.ConnectionImpl@4afaf949
+2026-05-05T09:53:06.188+09:00  INFO 226652 --- [ER_server] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-7 - Start completed.
+2026-05-05T09:53:06.189+09:00  WARN 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-05-05T09:53:06.189+09:00  INFO 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/er_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 8.0.40
+	Default catalog/schema: er_db/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-05-05T09:53:06.216+09:00  INFO 226652 --- [ER_server] [  restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-05T09:53:06.232+09:00  INFO 226652 --- [ER_server] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-05T09:53:06.270+09:00  WARN 226652 --- [ER_server] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-05-05T09:53:06.345+09:00  INFO 226652 --- [ER_server] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8081 (http) with context path '/'
+2026-05-05T09:53:06.346+09:00  INFO 226652 --- [ER_server] [  restartedMain] c.rodric.ER_server.ErServerApplication   : Started ErServerApplication in 0.41 seconds (process running for 4643.099)
+2026-05-05T09:53:06.347+09:00  INFO 226652 --- [ER_server] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
