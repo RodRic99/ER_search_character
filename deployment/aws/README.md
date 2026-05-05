@@ -67,9 +67,8 @@ Lightsail 또는 EC2 Ubuntu 서버를 생성합니다.
 보안 그룹 또는 방화벽:
 
 - SSH: `22`
-- 프론트엔드: `3000`
-- 백엔드 API: `8080`
-- 예측 API `8000`과 MySQL `3306`은 외부 공개하지 않는 것을 권장합니다. 현재 Compose 파일도 두 포트를 외부에 공개하지 않습니다.
+- HTTP: `80`
+- 예측 API `8000`, 백엔드 API `8080`, 프론트엔드 `3000`, MySQL `3306`은 외부 공개하지 않습니다. Nginx가 `80`에서 요청을 받아 내부 컨테이너로 전달합니다.
 
 ### 2. 서버에 Docker 설치
 
@@ -112,8 +111,8 @@ nano .env.aws
 예시:
 
 ```env
-NEXT_PUBLIC_API_BASE_URL=http://13.124.10.20:8080
-APP_CORS_ALLOWED_ORIGINS=http://13.124.10.20:3000
+NEXT_PUBLIC_API_BASE_URL=http://13.124.10.20
+APP_CORS_ALLOWED_ORIGINS=http://13.124.10.20
 ```
 
 ### 5. 실행
@@ -131,8 +130,8 @@ docker compose --env-file .env.aws -f compose.aws.yaml logs -f backend
 
 접속:
 
-- 프론트엔드: `http://YOUR_SERVER_PUBLIC_IP:3000`
-- 백엔드 API: `http://YOUR_SERVER_PUBLIC_IP:8080/api/tier-list`
+- 프론트엔드: `http://YOUR_SERVER_PUBLIC_IP`
+- 백엔드 API: `http://YOUR_SERVER_PUBLIC_IP/api/tier-list`
 
 ## 주의할 점
 
