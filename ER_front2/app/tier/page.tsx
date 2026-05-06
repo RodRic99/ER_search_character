@@ -239,8 +239,8 @@ export default function TierPage() {
                         <SelectValue placeholder="Select rank tier" />
                       </SelectTrigger>
                       <SelectContent className="border-white/10 bg-zinc-950 text-zinc-100">
-                        <SelectItem value="diamond">Diamond+</SelectItem>
-                        <SelectItem value="meteor">Meteor+</SelectItem>
+                        <SelectItem value="diamond">Diamond</SelectItem>
+                        <SelectItem value="meteor">Meteor</SelectItem>
                         <SelectItem value="mithril">Mithril+</SelectItem>
                       </SelectContent>
                     </Select>

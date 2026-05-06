@@ -33,9 +33,9 @@ public class TierListService {
     private static final String FIRST_WEEK_TABLE = "`1_week_tier`";
     private static final String SECOND_WEEK_TABLE = "`2_week_tier`";
     private static final List<TierRankTarget> TIER_RANK_TARGETS = List.of(
-            new TierRankTarget("diamond", DIAMOND_PLUS_THRESHOLD),
-            new TierRankTarget("meteor", METEOR_PLUS_THRESHOLD),
-            new TierRankTarget("mithril", MITHRIL_PLUS_THRESHOLD)
+            new TierRankTarget("diamond", DIAMOND_PLUS_THRESHOLD, METEOR_PLUS_THRESHOLD),
+            new TierRankTarget("meteor", METEOR_PLUS_THRESHOLD, MITHRIL_PLUS_THRESHOLD),
+            new TierRankTarget("mithril", MITHRIL_PLUS_THRESHOLD, null)
     );
     private static final List<String> TIER_RANK_ORDER = List.of("S", "A", "B", "C", "D");
     private static final double PICK_RATE_HIGH_BAND_RATIO = 0.2;
@@ -140,7 +140,7 @@ public class TierListService {
         jdbcTemplate.update("DELETE FROM " + tableName);
 
         for (TierRankTarget target : TIER_RANK_TARGETS) {
-            List<TierListEntryDto> entries = queryTierListEntries(window, target.minimumRankTier());
+            List<TierListEntryDto> entries = queryTierListEntries(window, target);
             applyRankAndTier(entries);
             insertTierCacheEntries(tableName, target.rankTier(), window, entries);
         }
@@ -236,7 +236,7 @@ public class TierListService {
         );
     }
 
-    private List<TierListEntryDto> queryTierListEntries(TierListWindow window, int minimumRankTier) {
+    private List<TierListEntryDto> queryTierListEntries(TierListWindow window, TierRankTarget target) {
         return jdbcTemplate.query(
                 """
                 WITH recent_rows AS (
@@ -252,6 +252,7 @@ public class TierListService {
                       AND startDtm <= ?
                       AND matchingmode = 3
                       AND rankPoint >= ?
+                      AND (? IS NULL OR rankPoint < ?)
                 ),
                 total_picks AS (
                     SELECT COUNT(*) AS total_pick_count
@@ -280,7 +281,9 @@ public class TierListService {
                 (resultSet, rowNum) -> mapEntry(resultSet),
                 window.windowStart(),
                 window.windowEnd(),
-                minimumRankTier
+                target.minimumRankTier(),
+                target.maximumRankTierExclusive(),
+                target.maximumRankTierExclusive()
         );
     }
 
@@ -294,14 +297,6 @@ public class TierListService {
             case "meteor" -> "meteor";
             case "diamond" -> "diamond";
             default -> "diamond";
-        };
-    }
-
-    private int resolveMinimumRankTier(String rankTier) {
-        return switch (normalizeRankTier(rankTier)) {
-            case "mithril" -> MITHRIL_PLUS_THRESHOLD;
-            case "meteor" -> METEOR_PLUS_THRESHOLD;
-            default -> DIAMOND_PLUS_THRESHOLD;
         };
     }
 
@@ -385,6 +380,6 @@ public class TierListService {
     private record TierListWindow(LocalDateTime windowStart, LocalDateTime windowEnd) {
     }
 
-    private record TierRankTarget(String rankTier, int minimumRankTier) {
+    private record TierRankTarget(String rankTier, int minimumRankTier, Integer maximumRankTierExclusive) {
     }
 }
