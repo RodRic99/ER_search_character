@@ -263,6 +263,7 @@ class SendERData:
         self.http_session = requests.Session()
         self.mysql_config = {
             "host": os.getenv("DB_HOST"),
+            "port": int(os.getenv("DB_PORT", "3306")),
             "user": os.getenv("DB_USER"),
             "password": os.getenv("DB_PASSWORD"),
             "database": os.getenv("DB_NAME"),
@@ -277,6 +278,7 @@ class SendERData:
     def get_mysql_conn(self):
         return pymysql.connect(
             host=self.mysql_config["host"],
+            port=self.mysql_config["port"],
             user=self.mysql_config["user"],
             password=self.mysql_config["password"],
             database=self.mysql_config["database"],

@@ -1,149 +1,217 @@
-# AWS 배포 및 비용 계산 가이드
+# AWS 배포와 RDS 이전 가이드
 
-이 프로젝트는 `Next.js` 프론트엔드, `Spring Boot` 백엔드, `FastAPI` 예측 API, `MySQL`로 구성되어 있습니다. 발표/캡스톤 용도라면 한 대의 AWS 서버에서 Docker Compose로 실행하는 구성이 가장 단순하고 비용 계산도 쉽습니다.
+이 프로젝트는 현재 `Next.js` 프론트엔드, `Spring Boot` 백엔드, `FastAPI` 예측 API, `MySQL` 데이터베이스로 구성되어 있습니다.
 
-## 추천 구성
+AWS에서는 두 가지 방식으로 운영할 수 있습니다.
 
-### 저비용 배포
+- 빠른 시작: [compose.aws.yaml](/C:/Users/wnsgu/OneDrive/바탕%20화면/CapStone/ER_search_character/compose.aws.yaml)로 EC2 한 대에 `mysql`까지 함께 실행
+- 운영 권장: [compose.aws.rds.yaml](/C:/Users/wnsgu/OneDrive/바탕%20화면/CapStone/ER_search_character/compose.aws.rds.yaml)로 애플리케이션만 띄우고, DB는 Amazon RDS MySQL 사용
 
-- Amazon Lightsail 또는 EC2 1대
-- Docker Compose로 `frontend`, `backend`, `predict-api`, `mysql` 실행
-- 고정 IP 1개
-- 필요 시 도메인과 HTTPS는 나중에 추가
+지금 단계에서는 두 번째 방식을 권장합니다. 프론트는 이미 AWS에 올라가 있고, 이후 `get_user` 수집/학습 파이프라인까지 AWS 쪽으로 옮기기 쉬워집니다.
 
-이 방식은 운영 편의성은 낮지만 서비스 수가 적어서 비용 설명이 쉽습니다.
+## 추천 구조
 
-### 운영형 배포
+- Frontend: Next.js
+- Backend: Spring Boot
+- Predict API: FastAPI
+- Database: Amazon RDS for MySQL
+- Reverse proxy: Nginx
 
-- AWS Amplify Hosting: Next.js 프론트엔드
-- Elastic Beanstalk 또는 ECS/Fargate: Spring Boot 백엔드
-- Elastic Beanstalk 또는 ECS/Fargate: FastAPI 예측 API
-- Amazon RDS for MySQL: DB
-- S3: CSV, 모델, 백업 파일 저장
+## 준비물
 
-이 방식은 안정적이지만 비용 항목이 많아집니다.
+- RDS MySQL 인스턴스
+- EC2 또는 기존 애플리케이션 서버
+- RDS 보안 그룹
+  - 백엔드/FastAPI가 있는 서버에서만 `3306` 접근 허용
+  - 가능하면 `Public Access = No`
 
-## AWS Pricing Calculator 입력 항목
+## 1. RDS 생성
 
-[AWS Pricing Calculator](https://calculator.aws/#/)에서 아래 항목을 추가하면 됩니다.
+권장 기본값:
 
-### 저비용 배포 계산
+- Engine: MySQL 8.x
+- Region: `ap-northeast-2` (서울)
+- DB name: `er_search_character`
+- App user: `er_app`
+- Public access: `No`
+- Backup retention: 최소 7일
 
-1. `Amazon Lightsail` 또는 `Amazon EC2`
-   - Region: `Asia Pacific (Seoul)` 또는 실제 배포 리전
-   - Instance: 최소 `2 vCPU / 4 GB RAM` 권장
-   - Hours: `730 hours/month`
-   - Storage: `40 GB` 이상
-2. `Data Transfer`
-   - 예상 월 방문자가 적으면 `10~50 GB/month`부터 입력
-3. 선택: `Amazon Route 53`
-   - 도메인을 AWS에서 관리할 경우 Hosted Zone 1개
+주의:
 
-### 운영형 배포 계산
+- 운영 DB 비밀번호는 절대 Git에 넣지 않습니다.
+- RDS endpoint는 `.env.aws.rds`에만 넣습니다.
 
-1. `AWS Amplify Hosting`
-   - Build minutes/month
-   - Stored data GB
-   - Data transfer out GB
-2. `Amazon EC2` 또는 `AWS Elastic Beanstalk`
-   - Spring Boot 백엔드용 인스턴스
-   - FastAPI 예측 API용 인스턴스
-3. `Amazon RDS for MySQL`
-   - Single-AZ
-   - 작은 인스턴스부터 시작
-   - Storage 20 GB 이상
-4. `Amazon S3`
-   - 모델 파일, CSV, 로그 백업 용량
-5. 선택: `Elastic Load Balancing`, `CloudWatch`, `Route 53`
+## 2. 로컬 DB 덤프 생성
 
-AWS 공식 문서 기준으로 Pricing Calculator는 비용 예측용 도구이며 실제 비용은 사용량에 따라 달라집니다. Elastic Beanstalk 자체는 추가 요금이 없고 생성된 EC2, S3, Load Balancer 같은 리소스 요금이 청구됩니다. RDS는 사용한 인스턴스 시간, 스토리지, 백업, 데이터 전송량에 따라 비용이 생깁니다.
+스크립트:
 
-## 배포 순서
+- [export-local-db.ps1](/C:/Users/wnsgu/OneDrive/바탕%20화면/CapStone/ER_search_character/deployment/aws/export-local-db.ps1)
 
-### 1. 서버 만들기
+예시:
 
-Lightsail 또는 EC2 Ubuntu 서버를 생성합니다.
-
-보안 그룹 또는 방화벽:
-
-- SSH: `22`
-- HTTP: `80`
-- 예측 API `8000`, 백엔드 API `8080`, 프론트엔드 `3000`, MySQL `3306`은 외부 공개하지 않습니다. Nginx가 `80`에서 요청을 받아 내부 컨테이너로 전달합니다.
-
-### 2. 서버에 Docker 설치
-
-Ubuntu 기준:
-
-```bash
-sudo apt update
-sudo apt install -y docker.io docker-compose-plugin git
-sudo usermod -aG docker ubuntu
+```powershell
+powershell -ExecutionPolicy Bypass -File .\deployment\aws\export-local-db.ps1 `
+  -Database er_search_character `
+  -User root `
+  -Password "YOUR_LOCAL_DB_PASSWORD"
 ```
 
-로그아웃 후 다시 접속합니다.
+결과 파일은 기본적으로 아래에 생성됩니다.
 
-### 3. 프로젝트 업로드
+- [deployment/aws/tmp/local-db-export.sql.zip](/C:/Users/wnsgu/OneDrive/바탕%20화면/CapStone/ER_search_character/deployment/aws/tmp/local-db-export.sql.zip)
 
-GitHub를 사용한다면:
+## 3. RDS로 import
 
-```bash
-git clone YOUR_REPOSITORY_URL
-cd ER_search_character
+스크립트:
+
+- [import-rds-dump.ps1](/C:/Users/wnsgu/OneDrive/바탕%20화면/CapStone/ER_search_character/deployment/aws/import-rds-dump.ps1)
+
+예시:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\deployment\aws\import-rds-dump.ps1 `
+  -RdsHost "your-rds-endpoint.ap-northeast-2.rds.amazonaws.com" `
+  -Database er_search_character `
+  -User er_app `
+  -Password "YOUR_RDS_PASSWORD" `
+  -DumpPath ".\deployment\aws\tmp\local-db-export.sql.zip"
 ```
 
-직접 업로드한다면 프로젝트 폴더 전체를 서버로 복사합니다.
+### EC2를 경유해서 import하는 경우
 
-### 4. 환경 변수 설정
+로컬 PC에서 직접 RDS에 붙지 않고, EC2에서 RDS로 import하는 방식입니다.
 
-```bash
-cp .env.aws.example .env.aws
-nano .env.aws
+업로드 스크립트:
+
+- [upload-db-dump-to-ec2.ps1](/C:/Users/wnsgu/OneDrive/바탕%20화면/CapStone/ER_search_character/deployment/aws/upload-db-dump-to-ec2.ps1)
+
+EC2 실행 스크립트:
+
+- [import-rds-from-ec2.sh](/C:/Users/wnsgu/OneDrive/바탕%20화면/CapStone/ER_search_character/deployment/aws/import-rds-from-ec2.sh)
+
+1. 로컬 dump 파일을 EC2로 올립니다.
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\deployment\aws\upload-db-dump-to-ec2.ps1 `
+  -PemPath ".\er-search-key.pem" `
+  -Ec2Host "YOUR_EC2_PUBLIC_IP_OR_DNS" `
+  -Ec2User "ubuntu" `
+  -LocalDumpPath ".\deployment\aws\tmp\local-db-export.sql.zip"
 ```
 
-반드시 수정할 값:
+2. EC2에 접속합니다.
 
-- `MYSQL_PASSWORD`
-- `MYSQL_ROOT_PASSWORD`
+```bash
+ssh -i er-search-key.pem ubuntu@YOUR_EC2_PUBLIC_IP_OR_DNS
+```
+
+3. import 스크립트를 EC2로 올리거나 내용을 붙여넣어 실행합니다.
+
+```bash
+chmod +x import-rds-from-ec2.sh
+./import-rds-from-ec2.sh \
+  "your-rds-endpoint.ap-northeast-2.rds.amazonaws.com" \
+  "3306" \
+  "er_search_character" \
+  "er_app" \
+  "YOUR_RDS_PASSWORD" \
+  "~/er_migration/local-db-export.sql.zip"
+```
+
+이 방식의 장점:
+
+- RDS를 퍼블릭으로 열 필요가 없음
+- RDS 보안 그룹에서 EC2 보안 그룹만 허용하면 됨
+- 대용량 import가 더 안정적임
+
+## 4. RDS 연결 확인
+
+스크립트:
+
+- [verify-rds-connection.ps1](/C:/Users/wnsgu/OneDrive/바탕%20화면/CapStone/ER_search_character/deployment/aws/verify-rds-connection.ps1)
+
+예시:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\deployment\aws\verify-rds-connection.ps1 `
+  -RdsHost "your-rds-endpoint.ap-northeast-2.rds.amazonaws.com" `
+  -Database er_search_character `
+  -User er_app `
+  -Password "YOUR_RDS_PASSWORD"
+```
+
+이 스크립트는 다음을 확인합니다.
+
+- 기본 접속 가능 여부
+- 주요 테이블 row 수
+- `rankdb_v2`, `rankdb_train_base`, `daily_position_synergy_cache`, `daily_score_metric_cache` 존재 여부
+
+## 5. AWS 애플리케이션 서버 설정
+
+RDS용 환경 파일 생성:
+
+```powershell
+Copy-Item .env.aws.rds.example .env.aws.rds
+```
+
+필수 수정값:
+
+- `RDS_HOST`
+- `RDS_PORT`
+- `RDS_DATABASE`
+- `RDS_USERNAME`
+- `RDS_PASSWORD`
 - `BSER_API_KEY`
 - `NEXT_PUBLIC_API_BASE_URL`
 - `APP_CORS_ALLOWED_ORIGINS`
 
-예시:
+## 6. 애플리케이션 실행
 
-```env
-NEXT_PUBLIC_API_BASE_URL=http://13.124.10.20
-APP_CORS_ALLOWED_ORIGINS=http://13.124.10.20
-```
-
-### 5. 실행
+RDS를 쓸 때는 `mysql` 컨테이너를 띄우지 않고 아래 compose만 사용합니다.
 
 ```bash
-docker compose --env-file .env.aws -f compose.aws.yaml up -d --build
+docker compose --env-file .env.aws.rds -f compose.aws.rds.yaml up -d --build
 ```
 
 상태 확인:
 
 ```bash
-docker compose --env-file .env.aws -f compose.aws.yaml ps
-docker compose --env-file .env.aws -f compose.aws.yaml logs -f backend
+docker compose --env-file .env.aws.rds -f compose.aws.rds.yaml ps
+docker compose --env-file .env.aws.rds -f compose.aws.rds.yaml logs -f backend
+docker compose --env-file .env.aws.rds -f compose.aws.rds.yaml logs -f predict-api
 ```
 
-접속:
+## 7. 수집/학습 파이프라인
 
-- 프론트엔드: `http://YOUR_SERVER_PUBLIC_IP`
-- 백엔드 API: `http://YOUR_SERVER_PUBLIC_IP/api/tier-list`
+현재 로컬 Windows에서 돌고 있는 스크립트도 `.env`의 DB 설정만 RDS로 바꾸면 그대로 사용할 수 있습니다.
 
-## 주의할 점
+관련 파일:
 
-- `NEXT_PUBLIC_API_BASE_URL`은 Next.js 빌드 시점에 들어갑니다. 서버 IP나 도메인을 바꾸면 프론트엔드 이미지를 다시 빌드해야 합니다.
-- MySQL 초기 스키마는 `eternareturn_DB/schema_rankdb.sql`로 생성됩니다. 실제 서비스 데이터가 필요하면 별도 import가 필요합니다.
-- `eternareturn_DB/.env`에는 로컬 비밀값이 들어갈 수 있으니 GitHub 공개 저장소에 올리지 않는 것이 좋습니다.
-- 비용 폭주를 막으려면 AWS Budgets에서 월 예산 알림을 꼭 설정하세요.
+- [eternareturn_DB/Get_User_data_py.py](/C:/Users/wnsgu/OneDrive/바탕%20화면/CapStone/ER_search_character/eternareturn_DB/Get_User_data_py.py)
+- [eternareturn_DB/daily_rank_pipeline.py](/C:/Users/wnsgu/OneDrive/바탕%20화면/CapStone/ER_search_character/eternareturn_DB/daily_rank_pipeline.py)
 
-## 공식 참고 링크
+즉 이전 직후에도:
 
-- [AWS Pricing Calculator](https://calculator.aws/#/)
-- [AWS Pricing Calculator 문서](https://docs.aws.amazon.com/cost-management/latest/userguide/pricing-calculator.html)
-- [Elastic Beanstalk 요금](https://aws.amazon.com/ko/elasticbeanstalk/pricing/)
-- [Amazon RDS 요금](https://aws.amazon.com/rds/pricing/)
-- [AWS Amplify 요금](https://aws.amazon.com/jp/amplify/pricing/)
+- 6시간마다 `get_user` 수집
+- 00시 기준 배치 학습/예측
+
+구조는 그대로 유지할 수 있습니다.
+
+## 롤백 방법
+
+RDS 전환이 잘 안 되면 애플리케이션만 다시 로컬 MySQL 모드로 되돌리면 됩니다.
+
+```bash
+docker compose --env-file .env.aws -f compose.aws.yaml up -d --build
+```
+
+## 체크리스트
+
+- [ ] RDS endpoint 확인
+- [ ] RDS 보안 그룹에서 애플리케이션 서버만 3306 허용
+- [ ] 로컬 dump 생성
+- [ ] RDS import 완료
+- [ ] `verify-rds-connection.ps1` 통과
+- [ ] `.env.aws.rds` 설정 완료
+- [ ] `compose.aws.rds.yaml`로 앱 실행
+- [ ] 백엔드 `/api/player-stats/simulate` 정상 응답 확인

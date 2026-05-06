@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-$taskName = "ER_Hourly_Rankdb_Collection"
+$taskName = "ER_6Hourly_Rankdb_Collection"
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $runnerScript = Join-Path $scriptDir "run_hourly_rankdb_collection.cmd"
 
@@ -16,7 +16,7 @@ $arguments = @(
     "/TN", $taskName,
     "/TR", $taskCommand,
     "/SC", "HOURLY",
-    "/MO", "1",
+    "/MO", "6",
     "/ST", $startTime,
     "/F"
 )
@@ -30,3 +30,4 @@ if ($process.ExitCode -ne 0) {
 Write-Host "Registered scheduled task: $taskName"
 Write-Host "Runner script: $runnerScript"
 Write-Host "First run starts at: $startTime"
+Write-Host "Repeat interval: every 6 hours"
