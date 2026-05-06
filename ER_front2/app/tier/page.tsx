@@ -37,6 +37,7 @@ interface TierListResponse {
 }
 
 type RankTierFilter = "diamond" | "meteor" | "mithril"
+type WindowFilter = "1" | "2"
 type SortDirection = "desc" | "asc"
 type SortKey =
   | "rank"
@@ -89,6 +90,7 @@ export default function TierPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [rankTierFilter, setRankTierFilter] = useState<RankTierFilter>("diamond")
+  const [windowFilter, setWindowFilter] = useState<WindowFilter>("1")
   const [sortKey, setSortKey] = useState<SortKey>("tier")
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc")
 
@@ -101,7 +103,7 @@ export default function TierPage() {
 
       try {
         const response = await fetch(
-          `${apiBaseUrl}/api/tier-list?rankTier=${rankTierFilter}`
+          `${apiBaseUrl}/api/tier-list?rankTier=${rankTierFilter}&week=${windowFilter}`
         )
         if (!response.ok) {
           throw new Error(`Server error: ${response.status}`)
@@ -127,7 +129,7 @@ export default function TierPage() {
     return () => {
       mounted = false
     }
-  }, [rankTierFilter])
+  }, [rankTierFilter, windowFilter])
 
   const sortedEntries = useMemo(() => {
     const entries = data?.entries ? [...data.entries] : []
@@ -158,9 +160,10 @@ export default function TierPage() {
     rankTierFilter === "mithril"
       ? "Mithril+"
       : rankTierFilter === "meteor"
-        ? "Meteor+"
-        : "Diamond+"
+        ? "Meteor"
+        : "Diamond"
   const sortLabel = sortDirection === "asc" ? "오름차순" : "내림차순"
+  const windowLabel = windowFilter === "2" ? "2주 전" : "1주 전"
 
   const handleSortChange = (key: SortKey) => {
     if (sortKey === key) {
@@ -215,27 +218,35 @@ export default function TierPage() {
                 </p>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+              <div className="grid gap-4 sm:grid-cols-2 lg:min-w-[520px]">
+                <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4">
                   <p className="text-xs uppercase tracking-[0.25em] text-zinc-500">Window</p>
-                  <p className="mt-2 text-sm font-medium text-white">
+                  <div className="mt-3">
+                    <Select
+                      value={windowFilter}
+                      onValueChange={(value) => setWindowFilter(value as WindowFilter)}
+                    >
+                      <SelectTrigger className="h-10 w-full border-white/10 bg-zinc-950/60 text-zinc-100">
+                        <SelectValue placeholder="Select window" />
+                      </SelectTrigger>
+                      <SelectContent className="border-white/10 bg-zinc-950 text-zinc-100">
+                        <SelectItem value="1">1주 전</SelectItem>
+                        <SelectItem value="2">2주 전</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <p className="mt-3 text-xs leading-5 text-zinc-400">
                     {data ? `${data.windowStart} ~ ${data.windowEnd}` : "-"}
                   </p>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                  <p className="text-xs uppercase tracking-[0.25em] text-zinc-500">Entries</p>
-                  <p className="mt-2 text-sm font-medium text-white">
-                    {data?.entries.length ?? 0} characters
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3">
+                <div className="rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-5 py-4">
                   <p className="text-xs uppercase tracking-[0.25em] text-cyan-200/70">Tier Filter</p>
-                  <div className="mt-2">
+                  <div className="mt-3">
                     <Select
                       value={rankTierFilter}
                       onValueChange={(value) => setRankTierFilter(value as RankTierFilter)}
                     >
-                      <SelectTrigger className="h-9 w-full border-cyan-400/20 bg-zinc-950/60 text-cyan-100">
+                      <SelectTrigger className="h-10 w-full border-cyan-400/20 bg-zinc-950/60 text-cyan-100">
                         <SelectValue placeholder="Select rank tier" />
                       </SelectTrigger>
                       <SelectContent className="border-white/10 bg-zinc-950 text-zinc-100">
@@ -245,10 +256,9 @@ export default function TierPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                  <p className="text-xs uppercase tracking-[0.25em] text-zinc-500">Current Sort</p>
-                  <p className="mt-2 text-sm font-medium text-white">{sortLabel}</p>
+                  <p className="mt-3 text-xs leading-5 text-cyan-100/70">
+                    {windowLabel} {filterLabel} 구간 통계
+                  </p>
                 </div>
               </div>
             </div>

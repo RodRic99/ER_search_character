@@ -54,11 +54,12 @@ public class TierListService {
         createTierCacheTable(SECOND_WEEK_TABLE);
     }
 
-    public TierListResponseDto getTierList(String rankTier) {
+    public TierListResponseDto getTierList(String rankTier, int week) {
         String normalizedRankTier = normalizeRankTier(rankTier);
-        ensureFirstWeekCache(normalizedRankTier);
-        TierListWindow window = queryCacheWindow(FIRST_WEEK_TABLE, normalizedRankTier);
-        List<TierListEntryDto> entries = queryCachedTierListEntries(FIRST_WEEK_TABLE, normalizedRankTier);
+        String cacheTable = resolveCacheTable(week);
+        ensureCache(cacheTable, normalizedRankTier);
+        TierListWindow window = queryCacheWindow(cacheTable, normalizedRankTier);
+        List<TierListEntryDto> entries = queryCachedTierListEntries(cacheTable, normalizedRankTier);
 
         return new TierListResponseDto(
                 window.windowStart().format(RESPONSE_TIME_FORMATTER),
@@ -91,16 +92,20 @@ public class TierListService {
                 secondWeekWindow.windowEnd());
     }
 
-    private void ensureFirstWeekCache(String rankTier) {
+    private String resolveCacheTable(int week) {
+        return week == 2 ? SECOND_WEEK_TABLE : FIRST_WEEK_TABLE;
+    }
+
+    private void ensureCache(String tableName, String rankTier) {
         Integer cacheCount = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM " + FIRST_WEEK_TABLE + " WHERE rank_tier = ?",
+                "SELECT COUNT(*) FROM " + tableName + " WHERE rank_tier = ?",
                 Integer.class,
                 rankTier
         );
         if (cacheCount == null || cacheCount == 0) {
             synchronized (tierCacheRefreshLock) {
                 Integer refreshedCacheCount = jdbcTemplate.queryForObject(
-                        "SELECT COUNT(*) FROM " + FIRST_WEEK_TABLE + " WHERE rank_tier = ?",
+                        "SELECT COUNT(*) FROM " + tableName + " WHERE rank_tier = ?",
                         Integer.class,
                         rankTier
                 );

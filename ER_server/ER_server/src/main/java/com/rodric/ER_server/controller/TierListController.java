@@ -17,8 +17,9 @@ public class TierListController {
 
     @GetMapping
     public TierListResponseDto getTierList(
-            @RequestParam(name = "rankTier", defaultValue = "diamond") String rankTier
+            @RequestParam(name = "rankTier", defaultValue = "diamond") String rankTier,
+            @RequestParam(name = "week", defaultValue = "1") int week
     ) {
-        return tierListService.getTierList(rankTier);
+        return tierListService.getTierList(rankTier, week);
     }
 }
