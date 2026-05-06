@@ -46,6 +46,7 @@ public class TierListService {
     private static final double MIN_RP_BAND = 0.5;
 
     private final JdbcTemplate jdbcTemplate;
+    private final Object tierCacheRefreshLock = new Object();
 
     @PostConstruct
     public void initializeTierCacheTables() {
@@ -97,7 +98,16 @@ public class TierListService {
                 rankTier
         );
         if (cacheCount == null || cacheCount == 0) {
-            refreshTierCaches();
+            synchronized (tierCacheRefreshLock) {
+                Integer refreshedCacheCount = jdbcTemplate.queryForObject(
+                        "SELECT COUNT(*) FROM " + FIRST_WEEK_TABLE + " WHERE rank_tier = ?",
+                        Integer.class,
+                        rankTier
+                );
+                if (refreshedCacheCount == null || refreshedCacheCount == 0) {
+                    refreshTierCaches();
+                }
+            }
         }
     }
 
@@ -230,7 +240,13 @@ public class TierListService {
         return jdbcTemplate.query(
                 """
                 WITH recent_rows AS (
-                    SELECT *
+                    SELECT
+                        characterNum,
+                        mmrGain,
+                        gamerank,
+                        damageToPlayer,
+                        damageFromPlayer,
+                        playerKill
                     FROM rankdb_v2
                     WHERE startDtm >= ?
                       AND startDtm <= ?
