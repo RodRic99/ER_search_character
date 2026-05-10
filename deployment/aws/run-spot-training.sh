@@ -2,8 +2,14 @@
 set -euo pipefail
 
 RUN_DATE="${1:-$(date +%F)}"
-PROJECT_ROOT="${PROJECT_ROOT:-$HOME/ER_search_character}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT_FROM_SCRIPT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+PROJECT_ROOT="${PROJECT_ROOT:-$REPO_ROOT_FROM_SCRIPT}"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
+
+if [ ! -d "$PROJECT_ROOT/eternareturn_DB" ]; then
+  PROJECT_ROOT="$REPO_ROOT_FROM_SCRIPT"
+fi
 
 cd "$PROJECT_ROOT/eternareturn_DB"
 
