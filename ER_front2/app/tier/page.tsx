@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import { Navigation } from "@/components/navigation"
 import { getCharacterImage, getCharacterWeaponCode } from "@/lib/characters"
 import { cn } from "@/lib/utils"
+import { getApiBaseUrl } from "@/lib/api-base-url"
 import { ArrowDown, ArrowUp, Loader2, TrendingUp } from "lucide-react"
 import { CharacterAvatar } from "@/components/character-avatar"
 import {
@@ -52,8 +53,7 @@ type SortKey =
   | "averageTakenDamage"
   | "averagePlayerKill"
 
-const apiBaseUrl =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080"
+const apiBaseUrl = getApiBaseUrl()
 
 const tierStyles: Record<string, string> = {
   S: "bg-cyan-400/15 text-cyan-300 ring-1 ring-cyan-400/40",

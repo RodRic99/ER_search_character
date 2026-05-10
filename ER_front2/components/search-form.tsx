@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { ChevronDown, ChevronUp, Loader2, Search, User, X } from "lucide-react"
 import { getCharacterImage } from "@/lib/characters"
 import { cn } from "@/lib/utils"
+import { getApiBaseUrl } from "@/lib/api-base-url"
 import { CharacterAvatar } from "@/components/character-avatar"
 import { CharacterSynergyStrip } from "./character-synergy-strip"
 
@@ -78,8 +79,7 @@ interface PlayerMost3Response {
   highestRankModelPredictionEnabled?: boolean
 }
 
-const apiBaseUrl =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080"
+const apiBaseUrl = getApiBaseUrl()
 
 const MAIN_SEARCH_NICKNAME_STORAGE_KEY = "main-search:first-player-nickname"
 const ENABLE_HIGHEST_RANK_MODEL_FLOW = false

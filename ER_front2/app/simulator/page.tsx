@@ -24,6 +24,7 @@ import { characters, getCharacterImage, getCharacterWeaponCode } from "@/lib/cha
 import { cn } from "@/lib/utils"
 import { CharacterAvatar } from "@/components/character-avatar"
 import { CharacterSynergyStrip } from "../../components/character-synergy-strip"
+import { getApiBaseUrl } from "@/lib/api-base-url"
 
 interface SimulatorResult {
   id: number
@@ -63,8 +64,7 @@ interface Most3PlayerItem {
   most3CharacterNums?: number[]
 }
 
-const apiBaseUrl =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080"
+const apiBaseUrl = getApiBaseUrl()
 
 const calculateGrade = (score: number): string => {
   if (score >= 90) return "S"
@@ -350,14 +350,9 @@ export default function SimulatorPage() {
           <div className="flex items-start justify-between gap-4">
             {showHelp && (
               <div className="space-y-1 text-sm text-muted-foreground">
-                <p>Select up to three characters to preview likely team combinations.</p>
+                <p>3개 까지의 캐릭터를 선택할수있습니다.</p>
                 <p>
-                  Nickname slots use the player&apos;s most 3 characters, while direct
-                  character picks stay fixed as single-character pools.
-                </p>
-                <p>
-                  The simulator queries the precomputed combination dataset and returns
-                  Top 10 for 2 slots or Top 5 for 3 slots.
+                  플레이어 닉네임을 입력하면 그 플레이어의 모스트 3를 불러와 자동으로 조합식에 추가됩니다
                 </p>
               </div>
             )}
@@ -488,7 +483,7 @@ export default function SimulatorPage() {
                         <HelpCircle className="h-8 w-8 text-muted-foreground" />
                       </div>
                       <span className="mt-2 text-sm text-muted-foreground">
-                        Pick a character above
+                        캐릭터를 선택해 주세요
                       </span>
                     </>
                   )}
@@ -496,7 +491,7 @@ export default function SimulatorPage() {
 
                 <div className="relative mt-4">
                   <Input
-                    placeholder={`Player nickname ${index + 1}`}
+                    placeholder={`플레이어 닉네임 ${index + 1}`}
                     value={searchInputs[index]}
                     onChange={(e) => handleSearchChange(index, e.target.value)}
                     className="pr-8"
@@ -532,7 +527,7 @@ export default function SimulatorPage() {
               className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isLoading ? "Calculating..." : calculateLabel}
+              {isLoading ? "계산중..." : calculateLabel}
             </Button>
           </div>
 

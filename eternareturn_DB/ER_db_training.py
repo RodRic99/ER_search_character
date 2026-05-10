@@ -312,6 +312,7 @@ class ERDBClassification:
             ) else None
             highest_mmr_candidates = [
                 (
+                    idx,
                     group.iloc[idx - 1]['mmrBefore'] if idx - 1 < len(group) else None,
                     row.get(f'characterNum_{idx}'),
                     row.get(f'position_main_{idx}'),
@@ -321,16 +322,19 @@ class ERDBClassification:
                 if idx - 1 < len(group) and pd.notna(group.iloc[idx - 1]['mmrBefore'])
             ]
             if highest_mmr_candidates:
-                _, highest_character_num, highest_position_main, highest_position_sub = max(
+                highest_player_index, _, highest_character_num, highest_position_main, highest_position_sub = max(
                     highest_mmr_candidates,
-                    key=lambda item: item[0],
+                    key=lambda item: item[1],
                 )
             else:
-                highest_character_num, highest_position_main, highest_position_sub = (None, None, None)
+                highest_player_index, highest_character_num, highest_position_main, highest_position_sub = (None, None, None, None)
 
             row['highest_mmr_character'] = highest_character_num
             row['highest_mmr_position_main'] = highest_position_main
             row['highest_mmr_position_sub'] = highest_position_sub
+            row['highest_mmr_player_1'] = int(highest_player_index == 1)
+            row['highest_mmr_player_2'] = int(highest_player_index == 2)
+            row['highest_mmr_player_3'] = int(highest_player_index == 3)
             row['main_melee_cnt'] = int(sum(pos == '근딜' for pos in main_positions))
             row['main_ranged_cnt'] = int(sum(pos == '원딜' for pos in main_positions))
             row['main_support_cnt'] = int(sum(pos == '서포터' for pos in main_positions))
@@ -920,6 +924,9 @@ class ERDBClassification:
                 'highest_mmr_character',
                 'highest_mmr_position_main',
                 'highest_mmr_position_sub',
+                'highest_mmr_player_1',
+                'highest_mmr_player_2',
+                'highest_mmr_player_3',
                 'characterNum_1', 'characterNum_2', 'characterNum_3',
                 'weaponCode_1', 'weaponCode_2', 'weaponCode_3',
                 'position_main_1', 'position_main_2', 'position_main_3',
