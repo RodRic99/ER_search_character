@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import argparse
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
@@ -105,6 +107,24 @@ def collect_recent_rankdb(
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--max-scan-count", type=int, default=int(os.getenv("MAX_SCAN_COUNT", DEFAULT_MAX_SCAN_COUNT)))
+    parser.add_argument(
+        "--max-consecutive-missing",
+        type=int,
+        default=int(os.getenv("MAX_CONSECUTIVE_MISSING", MAX_CONSECUTIVE_MISSING)),
+    )
+    parser.add_argument(
+        "--recent-hours-cutoff",
+        type=int,
+        default=int(os.getenv("RECENT_HOURS_CUTOFF", RECENT_HOURS_CUTOFF)),
+    )
+    args = parser.parse_args()
+
     project_root = Path(__file__).resolve().parent
     print(f"[collector] working_directory={project_root}")
-    collect_recent_rankdb()
+    collect_recent_rankdb(
+        max_scan_count=args.max_scan_count,
+        max_consecutive_missing=args.max_consecutive_missing,
+        recent_hours_cutoff=args.recent_hours_cutoff,
+    )
