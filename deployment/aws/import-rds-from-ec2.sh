@@ -18,14 +18,30 @@ SQL_PATH="${WORK_DIR}/import.sql"
 
 mkdir -p "${WORK_DIR}"
 
+install_package() {
+  if command -v dnf >/dev/null 2>&1; then
+    sudo dnf install -y "$@"
+  elif command -v yum >/dev/null 2>&1; then
+    sudo yum install -y "$@"
+  elif command -v apt-get >/dev/null 2>&1; then
+    sudo apt-get update
+    sudo apt-get install -y "$@"
+  else
+    echo "No supported package manager found."
+    exit 1
+  fi
+}
+
 if ! command -v unzip >/dev/null 2>&1; then
-  sudo apt-get update
-  sudo apt-get install -y unzip
+  install_package unzip
 fi
 
 if ! command -v mysql >/dev/null 2>&1; then
-  sudo apt-get update
-  sudo apt-get install -y mysql-client
+  if command -v dnf >/dev/null 2>&1 || command -v yum >/dev/null 2>&1; then
+    install_package mariadb105
+  else
+    install_package mysql-client
+  fi
 fi
 
 rm -f "${SQL_PATH}"

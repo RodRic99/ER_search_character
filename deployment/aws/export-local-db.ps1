@@ -4,6 +4,7 @@ param(
     [Parameter(Mandatory = $true)][string]$Database,
     [Parameter(Mandatory = $true)][string]$User,
     [Parameter(Mandatory = $true)][string]$Password,
+    [string[]]$Tables = @(),
     [string]$OutputPath = ""
 )
 
@@ -14,7 +15,13 @@ $tmpDir = Join-Path $scriptDir "tmp"
 New-Item -ItemType Directory -Force -Path $tmpDir | Out-Null
 
 if ([string]::IsNullOrWhiteSpace($OutputPath)) {
-    $OutputPath = Join-Path $tmpDir "local-db-export.sql.zip"
+    $dumpName = if ($Tables.Count -gt 0) {
+        "local-$($Tables -join '_')-export.sql.zip"
+    }
+    else {
+        "local-db-export.sql.zip"
+    }
+    $OutputPath = Join-Path $tmpDir $dumpName
 }
 
 $mysqldump = (Get-Command mysqldump).Source
@@ -40,11 +47,23 @@ $args = @(
     "--routines"
     "--triggers"
     "--hex-blob"
-    "--databases"
-    $Database
 )
 
-Write-Host "Exporting local database '$Database' from ${DbHost}:$Port ..."
+if ($Tables.Count -gt 0) {
+    $args += $Database
+    $args += $Tables
+}
+else {
+    $args += "--databases"
+    $args += $Database
+}
+
+if ($Tables.Count -gt 0) {
+    Write-Host "Exporting table(s) '$($Tables -join ", ")' from database '$Database' at ${DbHost}:$Port ..."
+}
+else {
+    Write-Host "Exporting local database '$Database' from ${DbHost}:$Port ..."
+}
 & $mysqldump @args | Out-File -FilePath $plainSqlPath -Encoding utf8
 
 if (-not (Test-Path $plainSqlPath)) {
