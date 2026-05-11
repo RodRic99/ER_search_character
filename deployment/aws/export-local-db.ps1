@@ -30,11 +30,15 @@ if (-not $mysqldump) {
 }
 
 $plainSqlPath = [System.IO.Path]::ChangeExtension($OutputPath, ".sql")
+$stderrPath = [System.IO.Path]::ChangeExtension($OutputPath, ".stderr.txt")
 if (Test-Path $plainSqlPath) {
     Remove-Item $plainSqlPath -Force
 }
 if (Test-Path $OutputPath) {
     Remove-Item $OutputPath -Force
+}
+if (Test-Path $stderrPath) {
+    Remove-Item $stderrPath -Force
 }
 
 $args = @(
@@ -64,14 +68,30 @@ if ($Tables.Count -gt 0) {
 else {
     Write-Host "Exporting local database '$Database' from ${DbHost}:$Port ..."
 }
-& $mysqldump @args | Out-File -FilePath $plainSqlPath -Encoding utf8
+
+& $mysqldump @args 2> $stderrPath | Out-File -FilePath $plainSqlPath -Encoding utf8
+$dumpExitCode = $LASTEXITCODE
+
+if ($dumpExitCode -ne 0) {
+    $stderrText = if (Test-Path $stderrPath) { Get-Content $stderrPath -Raw } else { "" }
+    throw "mysqldump failed with exit code $dumpExitCode. $stderrText"
+}
 
 if (-not (Test-Path $plainSqlPath)) {
     throw "SQL dump was not created."
 }
 
+$plainSqlFile = Get-Item $plainSqlPath
+if ($plainSqlFile.Length -lt 1024) {
+    $stderrText = if (Test-Path $stderrPath) { Get-Content $stderrPath -Raw } else { "" }
+    throw "SQL dump file is unexpectedly small ($($plainSqlFile.Length) bytes). $stderrText"
+}
+
 Write-Host "Compressing dump ..."
 Compress-Archive -Path $plainSqlPath -DestinationPath $OutputPath -Force
 Remove-Item $plainSqlPath -Force
+if (Test-Path $stderrPath) {
+    Remove-Item $stderrPath -Force
+}
 
 Write-Host "Done: $OutputPath"
