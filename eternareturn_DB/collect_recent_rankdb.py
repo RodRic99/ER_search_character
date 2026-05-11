@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
@@ -12,6 +13,7 @@ from Get_User_data_py import SendERData
 MAX_CONSECUTIVE_MISSING = 50
 DEFAULT_MAX_SCAN_COUNT = 5000
 RECENT_HOURS_CUTOFF = 2
+REQUEST_DELAY_SECONDS = 1.0
 
 
 @dataclass
@@ -30,6 +32,7 @@ def collect_recent_rankdb(
     max_scan_count: int = DEFAULT_MAX_SCAN_COUNT,
     max_consecutive_missing: int = MAX_CONSECUTIVE_MISSING,
     recent_hours_cutoff: int = RECENT_HOURS_CUTOFF,
+    request_delay_seconds: float = REQUEST_DELAY_SECONDS,
 ) -> CollectionSummary:
     sender = SendERData(game_id="0")
     sender.first_db_check()
@@ -47,6 +50,7 @@ def collect_recent_rankdb(
     print(f"[collector] end_game_id={end_game_id - 1}")
     print(f"[collector] recent_hours_cutoff={recent_hours_cutoff}")
     print(f"[collector] max_consecutive_missing={max_consecutive_missing}")
+    print(f"[collector] request_delay_seconds={request_delay_seconds}")
 
     for game_id in range(start_game_id, end_game_id):
         summary.scanned += 1
@@ -63,6 +67,8 @@ def collect_recent_rankdb(
                 summary.stopped_missing_cap = True
                 print("[collector] stopping because consecutive missing game ids reached the cap.")
                 break
+            if request_delay_seconds > 0:
+                time.sleep(request_delay_seconds)
             continue
 
         consecutive_missing = 0
@@ -71,6 +77,8 @@ def collect_recent_rankdb(
             summary.skipped_empty += 1
             sender.clear_temp_data()
             print(f"[collector] skip empty dataframe game_id={game_id}")
+            if request_delay_seconds > 0:
+                time.sleep(request_delay_seconds)
             continue
 
         first_startdtm: Optional[str] = frame["startDtm"].iloc[0] if "startDtm" in frame.columns else None
@@ -97,6 +105,9 @@ def collect_recent_rankdb(
             sender.clear_temp_data()
             print(f"[collector] skip unsupported matchingMode={matching_mode} game_id={game_id}")
 
+        if request_delay_seconds > 0:
+            time.sleep(request_delay_seconds)
+
     print(
         "[collector] finished "
         f"scanned={summary.scanned} rank={summary.inserted_rank} normal={summary.inserted_normal} "
@@ -119,6 +130,11 @@ if __name__ == "__main__":
         type=int,
         default=int(os.getenv("RECENT_HOURS_CUTOFF", RECENT_HOURS_CUTOFF)),
     )
+    parser.add_argument(
+        "--request-delay-seconds",
+        type=float,
+        default=float(os.getenv("REQUEST_DELAY_SECONDS", REQUEST_DELAY_SECONDS)),
+    )
     args = parser.parse_args()
 
     project_root = Path(__file__).resolve().parent
@@ -127,4 +143,5 @@ if __name__ == "__main__":
         max_scan_count=args.max_scan_count,
         max_consecutive_missing=args.max_consecutive_missing,
         recent_hours_cutoff=args.recent_hours_cutoff,
+        request_delay_seconds=args.request_delay_seconds,
     )

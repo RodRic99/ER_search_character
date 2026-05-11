@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import time
 from dataclasses import dataclass
 
 from Get_User_data_py import SendERData
@@ -22,6 +23,7 @@ def collect_from_game_id(
     max_consecutive_missing: int,
     recent_hours_cutoff: int,
     truncate_first: bool,
+    request_delay_seconds: float,
 ) -> CollectionSummary:
     sender = SendERData(game_id=str(start_game_id))
     sender.ensure_rankdb_v2_table()
@@ -40,6 +42,7 @@ def collect_from_game_id(
     print(f"[manual-collector] max_scan_count={max_scan_count}")
     print(f"[manual-collector] max_consecutive_missing={max_consecutive_missing}")
     print(f"[manual-collector] recent_hours_cutoff={recent_hours_cutoff}")
+    print(f"[manual-collector] request_delay_seconds={request_delay_seconds}")
 
     for game_id in range(start_game_id, start_game_id + max_scan_count):
         summary.scanned += 1
@@ -55,6 +58,8 @@ def collect_from_game_id(
                 summary.stopped_missing_cap = True
                 print("[manual-collector] stopping because consecutive missing game ids reached the cap.")
                 break
+            if request_delay_seconds > 0:
+                time.sleep(request_delay_seconds)
             continue
 
         consecutive_missing = 0
@@ -63,6 +68,8 @@ def collect_from_game_id(
             summary.skipped_empty += 1
             sender.clear_temp_data()
             print(f"[manual-collector] skip empty dataframe game_id={game_id}")
+            if request_delay_seconds > 0:
+                time.sleep(request_delay_seconds)
             continue
 
         first_startdtm = frame["startDtm"].iloc[0] if "startDtm" in frame.columns else None
@@ -85,6 +92,9 @@ def collect_from_game_id(
             sender.clear_temp_data()
             print(f"[manual-collector] skip matchingMode={matching_mode} game_id={game_id}")
 
+        if request_delay_seconds > 0:
+            time.sleep(request_delay_seconds)
+
     print(
         "[manual-collector] finished "
         f"scanned={summary.scanned} rank={summary.inserted_rank} "
@@ -100,6 +110,7 @@ def main():
     parser.add_argument("--max-scan-count", type=int, default=50000)
     parser.add_argument("--max-consecutive-missing", type=int, default=300)
     parser.add_argument("--recent-hours-cutoff", type=int, default=2)
+    parser.add_argument("--request-delay-seconds", type=float, default=1.0)
     parser.add_argument("--no-truncate", action="store_true")
     args = parser.parse_args()
 
@@ -109,6 +120,7 @@ def main():
         max_consecutive_missing=args.max_consecutive_missing,
         recent_hours_cutoff=args.recent_hours_cutoff,
         truncate_first=not args.no_truncate,
+        request_delay_seconds=args.request_delay_seconds,
     )
 
 

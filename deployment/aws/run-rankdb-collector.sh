@@ -46,6 +46,7 @@ if [ "${COLLECTOR_MODE:-recent}" = "manual" ]; then
     "--max-scan-count" "${MAX_SCAN_COUNT:-50000}"
     "--max-consecutive-missing" "${MAX_CONSECUTIVE_MISSING:-300}"
     "--recent-hours-cutoff" "${RECENT_HOURS_CUTOFF:-2}"
+    "--request-delay-seconds" "${REQUEST_DELAY_SECONDS:-1}"
   )
 
   if [ "${TRUNCATE_FIRST:-false}" != "true" ]; then
@@ -57,5 +58,6 @@ else
   "$PYTHON_BIN" collect_recent_rankdb.py \
     --max-scan-count "${MAX_SCAN_COUNT:-5000}" \
     --max-consecutive-missing "${MAX_CONSECUTIVE_MISSING:-50}" \
-    --recent-hours-cutoff "${RECENT_HOURS_CUTOFF:-2}" 2>&1 | tee -a "$LOG_PATH"
+    --recent-hours-cutoff "${RECENT_HOURS_CUTOFF:-2}" \
+    --request-delay-seconds "${REQUEST_DELAY_SECONDS:-1}" 2>&1 | tee -a "$LOG_PATH"
 fi
