@@ -68,9 +68,15 @@ if ($Tables.Count -gt 0) {
 else {
     Write-Host "Exporting local database '$Database' from ${DbHost}:$Port ..."
 }
-
-& $mysqldump @args 2>&1 | Tee-Object -FilePath $stderrPath | Out-File -FilePath $plainSqlPath -Encoding utf8
-$dumpExitCode = $LASTEXITCODE
+$argumentList = $args -join " "
+$process = Start-Process -FilePath $mysqldump `
+    -ArgumentList $argumentList `
+    -NoNewWindow `
+    -Wait `
+    -PassThru `
+    -RedirectStandardOutput $plainSqlPath `
+    -RedirectStandardError $stderrPath
+$dumpExitCode = $process.ExitCode
 
 if ($dumpExitCode -ne 0) {
     $stderrText = if (Test-Path $stderrPath) { Get-Content $stderrPath -Raw } else { "" }
