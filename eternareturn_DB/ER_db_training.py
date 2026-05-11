@@ -986,6 +986,8 @@ class ERDBClassification:
                 'reg_lambda': 2,
                 'subsample': 0.8,
                 'colsample_bytree': 0.8,
+                'n_jobs': os.cpu_count() or 1,
+                'tree_method': 'hist',
                 'random_state': random_state,
                 'early_stopping_rounds': 30,
                 'device': 'cuda',
