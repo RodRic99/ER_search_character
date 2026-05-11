@@ -11,6 +11,13 @@ if [ ! -d "$PROJECT_ROOT/eternareturn_DB" ]; then
   PROJECT_ROOT="$REPO_ROOT_FROM_SCRIPT"
 fi
 
+ENV_FILE="${PROJECT_ROOT}/.env.spot-training"
+if [ -f "$ENV_FILE" ]; then
+  set -a
+  source "$ENV_FILE"
+  set +a
+fi
+
 cd "$PROJECT_ROOT/eternareturn_DB"
 
 echo "[spot-training] run_date=$RUN_DATE"
