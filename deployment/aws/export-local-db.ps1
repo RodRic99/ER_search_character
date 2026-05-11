@@ -100,10 +100,21 @@ if ($stderrText -and ($stderrText -replace $warningPattern, "").Trim().Length -g
 }
 
 Write-Host "Compressing dump ..."
-Compress-Archive -Path $plainSqlPath -DestinationPath $OutputPath -Force
-Remove-Item $plainSqlPath -Force
-if (Test-Path $stderrPath) {
-    Remove-Item $stderrPath -Force
+try {
+    Compress-Archive -Path $plainSqlPath -DestinationPath $OutputPath -Force
+    Remove-Item $plainSqlPath -Force
+    if (Test-Path $stderrPath) {
+        Remove-Item $stderrPath -Force
+    }
+    Write-Host "Done: $OutputPath"
 }
-
-Write-Host "Done: $OutputPath"
+catch {
+    Write-Warning "Compression failed ($($_.Exception.Message)). Keeping raw SQL dump instead."
+    if (Test-Path $OutputPath) {
+        Remove-Item $OutputPath -Force
+    }
+    if (Test-Path $stderrPath) {
+        Remove-Item $stderrPath -Force
+    }
+    Write-Host "Done: $plainSqlPath"
+}
