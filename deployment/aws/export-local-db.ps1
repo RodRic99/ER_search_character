@@ -69,7 +69,7 @@ else {
     Write-Host "Exporting local database '$Database' from ${DbHost}:$Port ..."
 }
 
-& $mysqldump @args 2> $stderrPath | Out-File -FilePath $plainSqlPath -Encoding utf8
+& $mysqldump @args 2>&1 | Tee-Object -FilePath $stderrPath | Out-File -FilePath $plainSqlPath -Encoding utf8
 $dumpExitCode = $LASTEXITCODE
 
 if ($dumpExitCode -ne 0) {
@@ -85,6 +85,12 @@ $plainSqlFile = Get-Item $plainSqlPath
 if ($plainSqlFile.Length -lt 1024) {
     $stderrText = if (Test-Path $stderrPath) { Get-Content $stderrPath -Raw } else { "" }
     throw "SQL dump file is unexpectedly small ($($plainSqlFile.Length) bytes). $stderrText"
+}
+
+$stderrText = if (Test-Path $stderrPath) { Get-Content $stderrPath -Raw } else { "" }
+$warningPattern = "Using a password on the command line interface can be insecure."
+if ($stderrText -and ($stderrText -replace $warningPattern, "").Trim().Length -gt 0) {
+    Write-Warning "mysqldump emitted stderr output:`n$stderrText"
 }
 
 Write-Host "Compressing dump ..."
