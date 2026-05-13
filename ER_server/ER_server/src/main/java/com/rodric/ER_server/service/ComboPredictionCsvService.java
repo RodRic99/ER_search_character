@@ -268,7 +268,10 @@ public class ComboPredictionCsvService {
         Map<String, PositionAverageStats> statsBySignature = new HashMap<>();
 
         for (RecommendedCombinationDto combination : combinations) {
-            List<CharacterRoleInfo> roleInfos = resolveRoleInfos(combination.getCharacterNums());
+            List<CharacterRoleInfo> roleInfos = resolveRoleInfos(
+                    combination.getCharacterNums(),
+                    combination.getWeaponCodes()
+            );
             PositionSignature positionSignature = buildPositionSignature(roleInfos);
             combination.setPairPositionLabels(buildPairPositionLabels(roleInfos));
             combination.setPositionSummary(positionSignature.positionFullCombo());
@@ -374,13 +377,14 @@ public class ComboPredictionCsvService {
         return Math.round(normalizedScore * 10.0) / 10.0;
     }
 
-    private List<CharacterRoleInfo> resolveRoleInfos(List<Integer> characterNums) {
-        if (characterNums == null || characterNums.size() < 3) {
+    private List<CharacterRoleInfo> resolveRoleInfos(List<Integer> characterNums, List<Integer> weaponCodes) {
+        if (characterNums == null || weaponCodes == null || characterNums.size() < 3 || characterNums.size() != weaponCodes.size()) {
             return List.of();
         }
 
-        List<CharacterInfoDto> characterInfos = characterMasterService.findCharactersByCodes(
-                characterNums.stream().map(String::valueOf).toList()
+        List<CharacterInfoDto> characterInfos = characterMasterService.findCharactersByNumsAndWeapons(
+                characterNums,
+                weaponCodes
         );
         if (characterInfos.size() < 3) {
             return List.of();
