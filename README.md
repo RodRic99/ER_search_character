@@ -78,48 +78,9 @@ Open API를 통해 게임 데이터를 수집하고 전처리한 뒤 AWS RDS에 
 
 # 🏗 시스템 아키텍처
 
-```image
-!이리메타 시스템 아키텍쳐.drawio.png
+![System Architecture](images/system_architecture_img.png)
 
 ```
-
----
-
-# 📈 데이터 처리 과정
-
-```text
-Open API
-
-↓
-
-게임 데이터 수집
-
-↓
-
-데이터 전처리
-
-↓
-
-AWS RDS 저장
-
-↓
-
-XGBoost 모델 학습
-
-↓
-
-모든 조합 예측
-
-↓
-
-예측 결과 캐시 생성
-
-↓
-
-웹 서비스 제공
-```
-
----
 
 # 🧠 머신러닝 모델
 
