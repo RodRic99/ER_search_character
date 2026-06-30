@@ -1,11 +1,27 @@
 .env
+.env.*
+!.env*.example
+
+# Local IDE/editor files
+.idea/
+*.iml
+
+# Python cache/build artifacts
+__pycache__/
+*.py[cod]
+
+# Runtime logs
+*.log
+*.err.log
+
+# Local Gradle/cache artifacts
 .gradle-home/
+
+# Secrets and database dumps
 *.pem
 *.sql
 *.sql.zip
 *.dump
 *.bak
-deployment/aws/tmp/
 er-search-key.pem
 deployment/aws/tmp/
-*.sql.zip
