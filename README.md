@@ -47,6 +47,22 @@ Open API를 통해 게임 데이터를 수집하고 전처리한 뒤 AWS RDS에 
 
 ---
 
+# 🖼 서비스 화면
+
+## 닉네임 검색 기반 조합 추천
+
+![닉네임 검색 기반 조합 추천](images/스크린샷_30-6-2026_181523_er-front2.vercel.app.jpeg)
+
+## 시뮬레이터 조합 추천
+
+![시뮬레이터 조합 추천](images/스크린샷_30-6-2026_191644_er-front2.vercel.app.jpeg)
+
+## 캐릭터 티어표
+
+![캐릭터 티어표](images/스크린샷_30-6-2026_192015_er-front2.vercel.app.jpeg)
+
+---
+
 # 🛠 Tech Stack
 
 ## Frontend
@@ -79,8 +95,6 @@ Open API를 통해 게임 데이터를 수집하고 전처리한 뒤 AWS RDS에 
 # 🏗 시스템 아키텍처
 
 ![System Architecture](images/system_architecture_img.png)
-
-```
 
 # 🧠 머신러닝 모델
 
