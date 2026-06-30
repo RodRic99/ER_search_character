@@ -17,6 +17,8 @@ import java.util.Map;
 public class PlayerApiClient {
 
     private static final Logger log = LoggerFactory.getLogger(PlayerApiClient.class);
+    private static final int MAX_API_RETRIES = 3;
+    private static final long RETRY_DELAY_MILLIS = 1500L;
 
     private final RestClient restClient;
     private final String userLookupPath;
@@ -45,80 +47,99 @@ public class PlayerApiClient {
         this.matchingMode = matchingMode;
     }
 
-    // 외부 API 조회 1단계: 닉네임으로 BSER userId를 찾는다.
     public String fetchUserIdByPlayerName(String playerName) {
-        try {
-            Map<String, Object> response = restClient.get()
-                    .uri(uriBuilder -> uriBuilder
-                            .path(userLookupPath)
-                            .queryParam("query", playerName)
-                            .build())
-                    .retrieve()
-                    .body(Map.class);
+        for (int attempt = 1; attempt <= MAX_API_RETRIES; attempt++) {
+            try {
+                Map<String, Object> response = restClient.get()
+                        .uri(uriBuilder -> uriBuilder
+                                .path(userLookupPath)
+                                .queryParam("query", playerName)
+                                .build())
+                        .retrieve()
+                        .body(Map.class);
 
-            log.info("User lookup response for [{}]: {}", playerName, response);
+                log.info("User lookup response for [{}]: {}", playerName, response);
 
-            if (response == null || !(response.get("user") instanceof Map<?, ?> user)) {
-                throw new IllegalArgumentException("userId not found for player: " + playerName + ", response=" + response);
+                if (response == null || !(response.get("user") instanceof Map<?, ?> user)) {
+                    throw new IllegalArgumentException("userId not found for player: " + playerName + ", response=" + response);
+                }
+
+                Object userIdValue = user.get("userId");
+                if (userIdValue == null) {
+                    throw new IllegalArgumentException("userId not found for player: " + playerName + ", response=" + response);
+                }
+
+                return String.valueOf(userIdValue);
+            } catch (RestClientResponseException exception) {
+                if (shouldRetry(exception, attempt)) {
+                    log.warn("User lookup API hit rate limit. playerName={}, attempt={}/{}. Retrying after {} ms.",
+                            playerName, attempt, MAX_API_RETRIES, RETRY_DELAY_MILLIS);
+                    sleepBeforeRetry();
+                    continue;
+                }
+
+                log.error("User lookup API failed. path={}, playerName={}, status={}, body={}",
+                        userLookupPath, playerName, exception.getStatusCode(), exception.getResponseBodyAsString(), exception);
+                throw new IllegalStateException("User lookup API failed: " + exception.getStatusCode() + " " + exception.getResponseBodyAsString(), exception);
             }
-
-            Object userIdValue = user.get("userId");
-            if (userIdValue == null) {
-                throw new IllegalArgumentException("userId not found for player: " + playerName + ", response=" + response);
-            }
-
-            return String.valueOf(userIdValue);
-        } catch (RestClientResponseException exception) {
-            log.error("User lookup API failed. path={}, playerName={}, status={}, body={}",
-                    userLookupPath, playerName, exception.getStatusCode(), exception.getResponseBodyAsString(), exception);
-            throw new IllegalStateException("User lookup API failed: " + exception.getStatusCode() + " " + exception.getResponseBodyAsString(), exception);
         }
+
+        throw new IllegalStateException("User lookup API failed after retries for player: " + playerName);
     }
 
-    // 외부 API 조회 2단계: userId로 전적을 조회하고 사용량 기준 모스트3 캐릭터 번호를 뽑는다.
     public List<String> fetchMost3CharactersByUserId(String userId) {
         return fetchPlayerSeasonStatsByUserId(userId).most3CharacterCodes();
     }
 
     public PlayerSeasonStats fetchPlayerSeasonStatsByUserId(String userId) {
-        try {
-            Map<String, Object> response = restClient.get()
-                    .uri(uriBuilder -> uriBuilder
-                            .path(playerStatPath + "/" + userId + "/" + seasonId + "/" + matchingMode)
-                            .build())
-                    .retrieve()
-                    .body(Map.class);
+        for (int attempt = 1; attempt <= MAX_API_RETRIES; attempt++) {
+            try {
+                Map<String, Object> response = restClient.get()
+                        .uri(uriBuilder -> uriBuilder
+                                .path(playerStatPath + "/" + userId + "/" + seasonId + "/" + matchingMode)
+                                .build())
+                        .retrieve()
+                        .body(Map.class);
 
-            log.info("Player stat response for [{}]: {}", userId, response);
+                log.info("Player stat response for [{}]: {}", userId, response);
 
-            if (response == null || !(response.get("userStats") instanceof List<?> userStats) || userStats.isEmpty()) {
-                log.warn("userStats not found for userId={}, response={}", userId, response);
-                return new PlayerSeasonStats(Collections.emptyList(), null);
+                if (response == null || !(response.get("userStats") instanceof List<?> userStats) || userStats.isEmpty()) {
+                    log.warn("userStats not found for userId={}, response={}", userId, response);
+                    return new PlayerSeasonStats(Collections.emptyList(), null);
+                }
+
+                Object firstStat = userStats.get(0);
+                if (!(firstStat instanceof Map<?, ?> statMap) || !(statMap.get("characterStats") instanceof List<?> characterStats)) {
+                    log.warn("characterStats not found for userId={}, response={}", userId, response);
+                    return new PlayerSeasonStats(Collections.emptyList(), null);
+                }
+
+                List<String> most3CharacterCodes = characterStats.stream()
+                        .filter(Map.class::isInstance)
+                        .map(item -> (Map<?, ?>) item)
+                        .sorted(Comparator.comparingLong(this::extractUsageCount).reversed())
+                        .limit(3)
+                        .map(this::extractCharacterCode)
+                        .toList();
+
+                return new PlayerSeasonStats(most3CharacterCodes, extractRankPoint(statMap));
+            } catch (RestClientResponseException exception) {
+                if (shouldRetry(exception, attempt)) {
+                    log.warn("Player stat API hit rate limit. userId={}, attempt={}/{}. Retrying after {} ms.",
+                            userId, attempt, MAX_API_RETRIES, RETRY_DELAY_MILLIS);
+                    sleepBeforeRetry();
+                    continue;
+                }
+
+                log.error("Player stat API failed. path={}, userId={}, status={}, body={}",
+                        playerStatPath, userId, exception.getStatusCode(), exception.getResponseBodyAsString(), exception);
+                throw new IllegalStateException("Player stat API failed: " + exception.getStatusCode() + " " + exception.getResponseBodyAsString(), exception);
             }
-
-            Object firstStat = userStats.get(0);
-            if (!(firstStat instanceof Map<?, ?> statMap) || !(statMap.get("characterStats") instanceof List<?> characterStats)) {
-                log.warn("characterStats not found for userId={}, response={}", userId, response);
-                return new PlayerSeasonStats(Collections.emptyList(), null);
-            }
-
-            List<String> most3CharacterCodes = characterStats.stream()
-                    .filter(Map.class::isInstance)
-                    .map(item -> (Map<?, ?>) item)
-                    .sorted(Comparator.comparingLong(this::extractUsageCount).reversed())
-                    .limit(3)
-                    .map(this::extractCharacterCode)
-                    .toList();
-
-            return new PlayerSeasonStats(most3CharacterCodes, extractRankPoint(statMap));
-        } catch (RestClientResponseException exception) {
-            log.error("Player stat API failed. path={}, userId={}, status={}, body={}",
-                    playerStatPath, userId, exception.getStatusCode(), exception.getResponseBodyAsString(), exception);
-            throw new IllegalStateException("Player stat API failed: " + exception.getStatusCode() + " " + exception.getResponseBodyAsString(), exception);
         }
+
+        throw new IllegalStateException("Player stat API failed after retries for userId: " + userId);
     }
 
-    // BSER 응답 버전에 따라 사용 횟수 필드명이 다를 수 있어서 usages와 totalGames를 모두 확인한다.
     private long extractUsageCount(Map<?, ?> characterStat) {
         Object usages = characterStat.get("usages");
         if (usages instanceof Number number) {
@@ -155,6 +176,19 @@ public class PlayerApiClient {
         }
 
         return null;
+    }
+
+    private boolean shouldRetry(RestClientResponseException exception, int attempt) {
+        return exception.getStatusCode().value() == 429 && attempt < MAX_API_RETRIES;
+    }
+
+    private void sleepBeforeRetry() {
+        try {
+            Thread.sleep(RETRY_DELAY_MILLIS);
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("API retry delay interrupted.", exception);
+        }
     }
 
     public record PlayerSeasonStats(List<String> most3CharacterCodes, Integer rankPoint) {

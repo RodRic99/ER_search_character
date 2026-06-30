@@ -9,6 +9,8 @@ import com.rodric.ER_server.dto.PlayerMost3ResponseDto;
 import com.rodric.ER_server.dto.RecommendedCombinationDto;
 import com.rodric.ER_server.dto.SimulatorRecommendResponseDto;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -22,8 +24,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PlayerStatInfoService {
 
-    // BSER 외부 API 요청 제한을 피하기 위해 요청 사이에 잠깐 대기한다.
-    private static final long API_DELAY_MILLIS = 700L;
+    private static final Logger log = LoggerFactory.getLogger(PlayerStatInfoService.class);
+    private static final long API_DELAY_MILLIS = 1500L;
 
     @Value("${app.features.enable-highest-rank-model-predict:false}")
     private boolean enableHighestRankModelPredict;
@@ -33,20 +35,28 @@ public class PlayerStatInfoService {
     private final CharacterMasterService characterMasterService;
     private final ComboPredictionCsvService comboPredictionCsvService;
 
-    // 전체 흐름:
-    // 1. 닉네임 1~3개를 검증한다.
-    // 2. BSER API에서 각 플레이어의 userId와 모스트3 캐릭터를 가져온다.
-    // 3. 캐릭터 번호를 DB의 캐릭터 이름으로 변환한다.
-    // 4. 매일 미리 생성된 조합 예측 CSV에서 추천 조합을 찾는다.
     public PlayerMost3ResponseDto getMost3ForPlayers(List<String> playerNames) {
         List<String> sanitizedPlayerNames = validateAndSanitizePlayerNames(playerNames);
 
         List<List<Integer>> playerMost3CharacterNums = new ArrayList<>();
-        List<PlayerMost3ItemDto> players = sanitizedPlayerNames.stream()
-                .map(playerName -> buildPlayerMost3Item(playerName, playerMost3CharacterNums))
-                .toList();
-        List<RecommendedCombinationDto> recommendedCombinations =
-                comboPredictionCsvService.recommendCombinations(playerMost3CharacterNums);
+        List<PlayerMost3ItemDto> players = new ArrayList<>();
+
+        for (String playerName : sanitizedPlayerNames) {
+            try {
+                players.add(buildPlayerMost3Item(playerName, playerMost3CharacterNums));
+            } catch (IllegalArgumentException | IllegalStateException exception) {
+                log.warn("Skipping player in multi-search. playerName={}, reason={}", playerName, exception.getMessage());
+            }
+        }
+
+        if (players.isEmpty()) {
+            throw new IllegalStateException("Could not load stats for any requested players.");
+        }
+
+        List<RecommendedCombinationDto> recommendedCombinations = playerMost3CharacterNums.isEmpty()
+                ? List.of()
+                : comboPredictionCsvService.recommendCombinations(playerMost3CharacterNums);
+
         PlayerMost3ResponseDto responseDto = new PlayerMost3ResponseDto(players, recommendedCombinations);
         Optional<PlayerMost3ItemDto> highestRankPointPlayer = findHighestRankPointPlayer(players);
         responseDto.setHighestRankPointPlayerName(highestRankPointPlayer.map(PlayerMost3ItemDto::getPlayerName).orElse(null));
@@ -72,7 +82,6 @@ public class PlayerStatInfoService {
         return new SimulatorRecommendResponseDto(sanitizedPools, recommendedCombinations);
     }
 
-    // 프론트에서 빈 입력칸이 넘어오면 제외하고, 실제 닉네임은 최소 1개 이상 필요하다.
     private List<String> validateAndSanitizePlayerNames(List<String> playerNames) {
         if (playerNames == null) {
             throw new IllegalArgumentException("playerNames must contain 1 to 3 names.");
@@ -90,7 +99,6 @@ public class PlayerStatInfoService {
         return sanitizedPlayerNames;
     }
 
-    // 플레이어별 응답 데이터를 만들고, 추천 조합 검색에 사용할 모스트3 캐릭터 번호도 함께 모은다.
     private PlayerMost3ItemDto buildPlayerMost3Item(String playerName, List<List<Integer>> playerMost3CharacterNums) {
         String userId = playerApiClient.fetchUserIdByPlayerName(playerName);
         sleepBetweenRequests();
