@@ -8,7 +8,7 @@ const nextConfig = {
   },
   async rewrites() {
     const backendProxyTarget =
-      process.env.BACKEND_PROXY_TARGET ?? "http://52.78.209.177:8080"
+      process.env.BACKEND_PROXY_TARGET ?? "http://3.36.131.18"
 
     return [
       {
